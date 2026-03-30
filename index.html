@@ -800,20 +800,6 @@ function clientScreen(id) {
     ) +
     fld('SA ID Number','e.g. 9312340054084','9312340054084',true,'&#10003; Valid &middot; DOB: 14 Dec 1993 &middot; Male') +
     fld('Cellphone Number','+27 82 123 4567','',true,null) +
-    div('sim-box',
-      div('sim-bt','&#127918; Demo &mdash; choose a scenario') +
-      div('sim-chips',
-        [
-          { r:'new', dot:'sd-n', lbl:'&#128994; No existing account &mdash; new client' },
-          { r:'hb',  dot:'sd-h', lbl:'&#128309; Existing HB client, no Clinical yet' },
-          { r:'clin',dot:'sd-c', lbl:'&#128308; Already on Healthbridge Clinical' }
-        ].map(function(o){
-          return el('button',{class:'sch'+(simRoute===o.r?' sel':''),'data-sim':o.r},
-            div('sch-dot '+o.dot,'')+o.lbl
-          );
-        }).join('')
-      )
-    ) +
     el('button',{class:'pbtn','data-act':'next'},'Verify identity via DHA &rarr;')
   );
 
@@ -953,6 +939,24 @@ function internalPanel(id) {
 
   if(id==='id-entry') return (
     phaseHdr('p','Current phase','Provider entering ID &mdash; client-side validation only','p') +
+    div('db-spotlight',
+      div('db-spot-t','&#127918; Demo scenario selector') +
+      div('db-spot-s','Choose which type of provider this demo simulates. The provider never sees this &mdash; it controls the outcome of the HB database check at step 5.') +
+      div('db-steps',
+        [
+          { r:'new', dot:'al-g', lbl:'&#128994; No existing account &mdash; new client',   desc:'Will proceed through full registration' },
+          { r:'hb',  dot:'al-y', lbl:'&#128309; Existing HB client, no Clinical yet',      desc:'Profile will be pre-filled from HB records' },
+          { r:'clin',dot:'al-r', lbl:'&#128308; Already on Healthbridge Clinical',         desc:'Registration will be blocked at HB DB check' }
+        ].map(function(o){
+          var isSel = simRoute===o.r;
+          return '<button data-sim="'+o.r+'" style="display:flex;align-items:center;gap:8px;padding:6px 8px;border-radius:6px;background:'+(isSel?'rgba(255,255,255,.12)':'rgba(255,255,255,.04)')+';border:1px solid '+(isSel?'rgba(255,255,255,.25)':'rgba(255,255,255,.08)')+';cursor:pointer;width:100%;text-align:left;font-family:inherit">' +
+            '<div style="width:8px;height:8px;border-radius:50%;flex-shrink:0;background:'+(o.r==='new'?'#4ADE80':o.r==='hb'?'#FB923C':'#F87171')+'"></div>' +
+            '<div><div style="font-size:10px;font-weight:'+(isSel?'700':'500')+';color:'+(isSel?'#E2E8F0':'#94A3B8')+'">'+o.lbl+'</div>' +
+            '<div style="font-size:9px;color:#64748b">'+o.desc+'</div></div>' +
+            '</button>';
+        }).join('')
+      )
+    ) +
     div('proc-steps',
       procStep('&#9999;&#65039;','p','Provider enters SA ID + cellphone','Real-time format validation in browser &mdash; no server calls during input','p','act') +
       procStep('&#127963;&#65039;','a','DIS: dhaIdVerification (next)','Will verify identity against DHA Direct database','a','wait','api') +
