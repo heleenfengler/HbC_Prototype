@@ -3,76 +3,100 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>Healthbridge Clinical — Provider Registration Flow</title>
+<title>Healthbridge Clinical — Provider Registration Demo</title>
 <style>
+
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{
   --o:#F7941D;--dk:#1E1E1E;--white:#fff;
   --g:#1E9E5E;--r:#C0392B;--b:#1A5CB0;--pu:#7C3AED;
-  --bg:#ECEAE3;--border:#DDD9D0;--lt:#F5F4F0;--mid:#666;--fa:#AAA;
+  --bg:#ECEAE3;--bd:#DDD9D0;--lt:#F5F4F0;--mid:#666;--fa:#AAA;
   --gbg:#EDFBF3;--rbg:#FFF0EF;--bbg:#EFF6FF;--pubg:#F5F0FF;
   --gbd:#A7F3C0;--rbd:#FCA5A5;--bbd:#BFDBFE;--pubd:#DDD6FE;
 }
-html,body{height:100%;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-size:13px;color:var(--dk)}
+html,body{height:100%;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-size:13px;color:var(--dk);overflow:hidden}
 
-/* SCENE SHELLS */
-.scene{position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;transition:opacity .4s}
-.scene.off{opacity:0;pointer-events:none}
-.scene.on{opacity:1;pointer-events:all}
+/* ── SCENE MANAGEMENT ── */
+.scene{position:fixed;inset:0;display:none;flex-direction:column;align-items:center;justify-content:center}
+.scene.active{display:flex}
 
-/* SCENE 1 - CONFERENCE */
-#s-conf{background:linear-gradient(145deg,#0F1923,#1A2A3A,#0A1520);overflow:hidden;z-index:10}
-.cbg-c{position:absolute;border-radius:50%;background:radial-gradient(circle,rgba(247,148,29,.07),transparent 70%)}
-.c1{width:600px;height:600px;top:-150px;right:-150px}.c2{width:400px;height:400px;bottom:-100px;left:-100px}
+/* ── SCENE 0: PRESENTER SETUP ── */
+#s-setup{background:var(--dk);z-index:10}
+.setup-card{width:520px;background:#fff;border-radius:20px;overflow:hidden;box-shadow:0 32px 80px rgba(0,0,0,.5)}
+.setup-hdr{background:var(--dk);padding:1.5rem 2rem;display:flex;align-items:center;gap:12px;border-bottom:3px solid var(--o)}
+.setup-hdr-logo{display:flex;align-items:center;gap:10px}
+.setup-hdr-t{color:#fff;font-size:18px;font-weight:800;letter-spacing:-.4px}
+.setup-hdr-s{color:#555;font-size:10px}
+.setup-body{padding:2rem}
+.setup-section{margin-bottom:1.5rem}
+.setup-section-t{font-size:11px;font-weight:700;color:var(--fa);text-transform:uppercase;letter-spacing:.6px;margin-bottom:.75rem}
+.route-options{display:flex;flex-direction:column;gap:.5rem}
+.route-opt{display:flex;align-items:flex-start;gap:12px;padding:.85rem 1rem;border-radius:10px;border:2px solid var(--bd);cursor:pointer;transition:all .2s;background:#fff}
+.route-opt:hover{border-color:var(--fa)}
+.route-opt.sel-n{border-color:var(--g);background:var(--gbg)}
+.route-opt.sel-h{border-color:var(--b);background:var(--bbg)}
+.route-opt.sel-c{border-color:var(--r);background:var(--rbg)}
+.route-dot{width:14px;height:14px;border-radius:50%;flex-shrink:0;margin-top:3px}
+.rd-n{background:var(--g)}.rd-h{background:var(--b)}.rd-c{background:var(--r)}
+.route-opt-t{font-size:13px;font-weight:700;color:var(--dk);margin-bottom:2px}
+.route-opt-s{font-size:11px;color:var(--mid);line-height:1.4}
+.src-row{display:flex;gap:.5rem}
+.src-btn{flex:1;padding:.55rem .5rem;border-radius:8px;border:1.5px solid var(--bd);background:#fff;font-size:11px;font-weight:600;cursor:pointer;color:var(--mid);transition:all .2s;font-family:inherit;text-align:center}
+.src-btn:hover{border-color:var(--o);color:var(--o)}
+.src-btn.sel{background:var(--o);border-color:var(--o);color:#fff}
+.setup-footer{padding:0 2rem 2rem}
+.start-btn{width:100%;padding:14px;background:var(--o);color:#fff;border:none;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:8px;transition:opacity .2s}
+.start-btn:hover{opacity:.9}
+
+/* ── SCENE 1: CONFERENCE FLYER ── */
+#s-conf{background:linear-gradient(145deg,#0F1923,#1A2A3A,#0A1520);z-index:20;overflow:hidden}
+.cbg{position:absolute;inset:0;overflow:hidden;pointer-events:none}
+.cbc{position:absolute;border-radius:50%;background:radial-gradient(circle,rgba(247,148,29,.07),transparent 70%)}
+.c1{width:600px;height:600px;top:-150px;right:-150px}
+.c2{width:400px;height:400px;bottom:-100px;left:-100px}
 @keyframes fadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
-@keyframes scanLine{0%{top:8px;opacity:.7}50%{top:132px;opacity:1}100%{top:8px;opacity:.7}}
-@keyframes bounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}
-@keyframes sp{to{transform:rotate(360deg)}}
-@keyframes pp{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.5;transform:scale(.85)}}
-@keyframes tickPop{from{transform:scale(0)}to{transform:scale(1)}}
-@keyframes edot{0%,100%{background:#DDD;transform:scale(1)}50%{background:var(--o);transform:scale(1.3)}}
-.conf-banner{text-align:center;margin-bottom:2.5rem;animation:fadeUp .8s ease forwards;opacity:0}
+.conf-text{text-align:center;margin-bottom:2.5rem;animation:fadeUp .7s ease forwards}
 .conf-event{font-size:11px;font-weight:700;letter-spacing:2px;color:var(--o);text-transform:uppercase;margin-bottom:.5rem}
-.conf-title{font-size:28px;font-weight:800;color:#fff;letter-spacing:-.5px;line-height:1.2;margin-bottom:.4rem}
-.conf-sub{font-size:13px;color:rgba(255,255,255,.4);margin-bottom:.3rem}
-.conf-loc{font-size:11px;color:rgba(255,255,255,.25);display:flex;align-items:center;gap:5px;justify-content:center}
-.flyer{width:290px;background:#fff;border-radius:20px;overflow:hidden;box-shadow:0 32px 80px rgba(0,0,0,.5);animation:fadeUp .8s .25s ease forwards;opacity:0}
-.fy-hdr{background:var(--dk);padding:1rem 1.25rem;display:flex;align-items:center;gap:9px}
-.fy-lt{color:#fff;font-size:14px;font-weight:700;letter-spacing:-.3px}
-.fy-ls{color:#555;font-size:8px}
-.fy-body{padding:1.25rem;text-align:center}
-.fy-h{font-size:13px;font-weight:700;color:var(--dk);margin-bottom:.3rem}
-.fy-s{font-size:10px;color:#888;line-height:1.5;margin-bottom:1rem}
-.fy-badge{display:inline-block;background:var(--o);color:#fff;font-size:8px;font-weight:700;padding:2px 9px;border-radius:10px;margin-bottom:.85rem;text-transform:uppercase;letter-spacing:.5px}
-.qr-wrap{position:relative;width:150px;height:150px;margin:0 auto .85rem;cursor:pointer}
-.qr-frame{width:150px;height:150px;border-radius:10px;overflow:hidden;border:1.5px solid #E8E6E0;position:relative;box-shadow:0 4px 16px rgba(0,0,0,.1)}
-.qr-inner{width:100%;height:100%;background:#fff;display:flex;align-items:center;justify-content:center}
-.qr-scan-line{position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--o),transparent);animation:scanLine 2.5s ease-in-out infinite}
-.qr-hover{position:absolute;inset:0;border-radius:10px;background:rgba(247,148,29,.85);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;opacity:0;transition:opacity .2s}
+.conf-title{font-size:30px;font-weight:800;color:#fff;letter-spacing:-.5px;line-height:1.2;margin-bottom:.35rem}
+.conf-sub{font-size:13px;color:rgba(255,255,255,.4)}
+.flyer{width:285px;background:#fff;border-radius:20px;overflow:hidden;box-shadow:0 32px 80px rgba(0,0,0,.5);animation:fadeUp .7s .2s ease forwards;opacity:0}
+.fy-hdr{background:var(--dk);padding:.9rem 1.2rem;display:flex;align-items:center;gap:8px}
+.fy-lt{color:#fff;font-size:13px;font-weight:700}.fy-ls{color:#555;font-size:8px}
+.fy-body{padding:1.2rem;text-align:center}
+.fy-h{font-size:13px;font-weight:700;color:var(--dk);margin-bottom:.25rem}
+.fy-s{font-size:10px;color:#888;line-height:1.5;margin-bottom:.85rem}
+.fy-badge{display:inline-block;background:var(--o);color:#fff;font-size:8px;font-weight:700;padding:2px 9px;border-radius:10px;margin-bottom:.75rem;text-transform:uppercase;letter-spacing:.5px}
+.qr-wrap{position:relative;width:148px;height:148px;margin:0 auto .75rem;cursor:pointer}
+.qr-frame{width:148px;height:148px;border-radius:10px;overflow:hidden;border:1.5px solid #E8E6E0;position:relative;box-shadow:0 4px 16px rgba(0,0,0,.1);background:#fff;display:flex;align-items:center;justify-content:center}
+@keyframes qrscan{0%{top:8px;opacity:.7}50%{top:130px;opacity:1}100%{top:8px;opacity:.7}}
+.qr-scan{position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--o),transparent);animation:qrscan 2.5s ease-in-out infinite}
+.qr-hover{position:absolute;inset:0;border-radius:10px;background:rgba(247,148,29,.88);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;opacity:0;transition:opacity .2s}
 .qr-wrap:hover .qr-hover{opacity:1}
 .qr-hover-t{font-size:11px;font-weight:700;color:#fff}
-.qr-corner{position:absolute;width:14px;height:14px}
-.qr-corner.tl{top:-1px;left:-1px;border-top:2.5px solid var(--o);border-left:2.5px solid var(--o);border-radius:4px 0 0 0}
-.qr-corner.tr{top:-1px;right:-1px;border-top:2.5px solid var(--o);border-right:2.5px solid var(--o);border-radius:0 4px 0 0}
-.qr-corner.bl{bottom:-1px;left:-1px;border-bottom:2.5px solid var(--o);border-left:2.5px solid var(--o);border-radius:0 0 0 4px}
-.qr-corner.br{bottom:-1px;right:-1px;border-bottom:2.5px solid var(--o);border-right:2.5px solid var(--o);border-radius:0 0 4px 0}
+.qr-c{position:absolute;width:14px;height:14px}
+.qr-c.tl{top:-1px;left:-1px;border-top:2.5px solid var(--o);border-left:2.5px solid var(--o);border-radius:4px 0 0 0}
+.qr-c.tr{top:-1px;right:-1px;border-top:2.5px solid var(--o);border-right:2.5px solid var(--o);border-radius:0 4px 0 0}
+.qr-c.bl{bottom:-1px;left:-1px;border-bottom:2.5px solid var(--o);border-left:2.5px solid var(--o);border-radius:0 0 0 4px}
+.qr-c.br{bottom:-1px;right:-1px;border-bottom:2.5px solid var(--o);border-right:2.5px solid var(--o);border-radius:0 0 4px 0}
 .fy-cta{font-size:9px;color:#aaa;margin-bottom:.2rem}
 .fy-url{font-size:8px;color:var(--o);font-weight:600}
-.fy-foot{padding:.65rem 1.25rem;background:#FAFAF8;border-top:1px solid #EEE;display:flex;align-items:center;gap:7px;justify-content:center}
-.fy-foot-l{font-size:9px;font-weight:700;color:var(--dk)}
-.fy-foot-s{font-size:8px;color:#aaa}
-.src-badges{display:flex;gap:7px;margin-top:1.5rem;animation:fadeUp .8s .5s ease forwards;opacity:0}
-.sbadge{padding:4px 10px;border-radius:20px;font-size:9px;font-weight:700;border:1px solid rgba(255,255,255,.1);color:rgba(255,255,255,.35);letter-spacing:.3px;text-transform:uppercase;cursor:pointer;transition:all .2s}
-.sbadge:hover,.sbadge.active{background:rgba(247,148,29,.15);border-color:rgba(247,148,29,.4);color:var(--o)}
-.tap-cue{margin-top:1.25rem;display:flex;align-items:center;gap:7px;animation:fadeUp .8s .65s ease forwards;opacity:0;cursor:pointer}
-.tap-a{font-size:14px;color:var(--o);animation:bounce .8s ease-in-out infinite}
+.fy-foot{padding:.6rem 1.2rem;background:#FAFAF8;border-top:1px solid #EEE;display:flex;align-items:center;gap:7px;justify-content:center}
+.fy-foot-l{font-size:9px;font-weight:700;color:var(--dk)}.fy-foot-s{font-size:8px;color:#aaa}
+.tap-cue{margin-top:1.5rem;display:flex;align-items:center;gap:7px;animation:fadeUp .7s .45s ease forwards;opacity:0;cursor:pointer}
+@keyframes bouncey{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}
+.tap-a{font-size:14px;color:var(--o);animation:bouncey .9s ease-in-out infinite}
 .tap-t{font-size:11px;color:rgba(255,255,255,.4)}
+/* Route ribbon on flyer */
+.route-ribbon{font-size:8px;font-weight:700;padding:3px 9px;border-radius:0 0 8px 8px;text-transform:uppercase;letter-spacing:.4px;display:inline-block;margin-bottom:.6rem}
+.rr-n{background:var(--gbg);color:var(--g);border:1px solid var(--gbd)}
+.rr-h{background:var(--bbg);color:var(--b);border:1px solid var(--bbd)}
+.rr-c{background:var(--rbg);color:var(--r);border:1px solid var(--rbd)}
 
-/* SCENE 2 - CAMERA */
-#s-cam{background:#000;z-index:20}
+/* ── SCENE 2: CAMERA ── */
+#s-cam{background:#000;z-index:30}
 .cam-bg{position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,.7) 0%,rgba(0,0,0,.15) 30%,rgba(0,0,0,.15) 70%,rgba(0,0,0,.7) 100%)}
 .cam-world{position:absolute;inset:0;overflow:hidden}
-.cw-i{position:absolute;border-radius:6px;background:rgba(255,255,255,.025)}
+.cw{position:absolute;border-radius:6px;background:rgba(255,255,255,.025)}
 .cw1{width:200px;height:110px;top:8%;left:5%;transform:rotate(-3deg)}
 .cw2{width:140px;height:75px;top:14%;right:8%;transform:rotate(2deg)}
 .cw3{width:170px;height:90px;bottom:18%;left:7%;transform:rotate(1deg)}
@@ -81,231 +105,247 @@ html,body{height:100%;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sa
 .cam-btn{width:30px;height:30px;border-radius:50%;background:rgba(0,0,0,.5);border:1px solid rgba(255,255,255,.2);display:flex;align-items:center;justify-content:center;cursor:pointer;color:#fff;font-size:13px}
 .cam-lbl{font-size:12px;font-weight:600;color:rgba(255,255,255,.9);text-align:center;flex:1}
 @keyframes vfscan{0%{top:15px;opacity:0}10%{opacity:1}90%{opacity:1}100%{top:215px;opacity:0}}
+.vf-shadow{position:absolute;top:50%;left:50%;transform:translate(-50%,-55%);width:230px;height:230px;z-index:9;box-shadow:0 0 0 4000px rgba(0,0,0,.52);border-radius:3px}
 .vf-box{position:absolute;top:50%;left:50%;transform:translate(-50%,-55%);width:230px;height:230px;z-index:10}
-.vf-c{position:absolute;width:26px;height:26px}
+.vf-c{position:absolute;width:26px;height:26px;transition:border-color .2s}
 .vf-c.tl{top:0;left:0;border-top:3px solid #fff;border-left:3px solid #fff;border-radius:5px 0 0 0}
 .vf-c.tr{top:0;right:0;border-top:3px solid #fff;border-right:3px solid #fff;border-radius:0 5px 0 0}
 .vf-c.bl{bottom:0;left:0;border-bottom:3px solid #fff;border-left:3px solid #fff;border-radius:0 0 0 5px}
 .vf-c.br{bottom:0;right:0;border-bottom:3px solid #fff;border-right:3px solid #fff;border-radius:0 0 5px 0}
 .vf-qr{position:absolute;top:15px;left:15px;right:15px;bottom:15px;background:#fff;border-radius:5px;display:flex;align-items:center;justify-content:center}
 .vf-scanl{position:absolute;top:15px;left:15px;right:15px;height:2px;background:linear-gradient(90deg,transparent,rgba(247,148,29,.95),var(--o),rgba(247,148,29,.95),transparent);animation:vfscan 1.8s ease-in-out infinite;z-index:12}
-.vf-shadow{position:absolute;top:50%;left:50%;transform:translate(-50%,-55%);width:230px;height:230px;z-index:9;box-shadow:0 0 0 4000px rgba(0,0,0,.52);border-radius:3px}
-.cam-hint-wrap{position:absolute;bottom:36%;left:50%;transform:translateX(-50%);z-index:10}
-.cam-hint-t{font-size:11px;color:rgba(255,255,255,.7);background:rgba(0,0,0,.4);padding:4px 13px;border-radius:18px;white-space:nowrap}
+.cam-hint{position:absolute;bottom:36%;left:50%;transform:translateX(-50%);z-index:10;font-size:11px;color:rgba(255,255,255,.7);background:rgba(0,0,0,.4);padding:4px 13px;border-radius:18px;white-space:nowrap}
 .cam-bottom{position:absolute;bottom:0;left:0;right:0;z-index:10;padding:1rem 1.25rem 2.5rem;display:flex;align-items:center;justify-content:center}
 .shutter{width:60px;height:60px;border-radius:50%;border:3px solid rgba(255,255,255,.8);display:flex;align-items:center;justify-content:center;cursor:pointer}
 .shutter-in{width:48px;height:48px;border-radius:50%;background:#fff}
-.scan-flash{position:absolute;inset:0;z-index:50;background:#fff;opacity:0;pointer-events:none;transition:opacity .15s}
-.scan-flash.on{opacity:.85}
-.scan-tick{position:absolute;top:50%;left:50%;transform:translate(-50%,-55%);width:230px;height:230px;z-index:60;display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity .3s}
+@keyframes flash{0%{opacity:0}30%{opacity:.9}100%{opacity:0}}
+.scan-flash{position:absolute;inset:0;z-index:50;background:#fff;opacity:0;pointer-events:none}
+.scan-flash.on{animation:flash .35s ease forwards}
+@keyframes tickPop{from{transform:scale(0)}to{transform:scale(1)}}
+.scan-tick{position:absolute;top:50%;left:50%;transform:translate(-50%,-55%);z-index:60;display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity .3s}
 .scan-tick.on{opacity:1}
 .tick-ring{width:68px;height:68px;border-radius:50%;background:var(--g);display:flex;align-items:center;justify-content:center;font-size:30px;color:#fff;animation:tickPop .4s cubic-bezier(.34,1.56,.64,1) forwards}
 
-/* SCENE 3 - VALIDATION */
-#s-val{background:var(--dk);z-index:30}
+/* ── SCENE 3: VALIDATION ── */
+#s-val{background:var(--dk);z-index:40}
 .val-phone{width:300px;background:#fff;border-radius:26px;overflow:hidden;box-shadow:0 32px 80px rgba(0,0,0,.6)}
 .vp-bar{height:4px;background:var(--dk)}
-.vp-hdr{background:var(--dk);padding:.7rem .9rem;display:flex;align-items:center;gap:7px}
+.vp-hdr{background:var(--dk);padding:.65rem .9rem;display:flex;align-items:center;gap:7px}
 .vp-lt{color:#fff;font-size:12px;font-weight:700}.vp-ls{color:#555;font-size:8px}
-.vp-b{margin-left:auto;background:var(--o);color:#fff;font-size:7px;font-weight:700;padding:2px 7px;border-radius:9px}
-.vp-body{padding:1.5rem 1.1rem;min-height:350px;display:flex;flex-direction:column;align-items:center}
-.vp-foot{padding:.45rem 1rem;border-top:1px solid #EEE;text-align:center;font-size:8px;color:#ccc;background:#FAFAF8}
-.val-icon{width:52px;height:52px;border-radius:14px;background:var(--dk);display:flex;align-items:center;justify-content:center;margin:0 auto .75rem}
+.vp-badge{margin-left:auto;background:var(--o);color:#fff;font-size:7px;font-weight:700;padding:2px 7px;border-radius:9px}
+.vp-body{padding:1.5rem 1.1rem;min-height:300px;display:flex;flex-direction:column;align-items:center}
+.vp-foot{padding:.4rem 1rem;border-top:1px solid #EEE;text-align:center;font-size:8px;color:#ccc;background:#FAFAF8}
+.val-icon{width:50px;height:50px;border-radius:14px;background:var(--dk);display:flex;align-items:center;justify-content:center;margin:0 auto .7rem}
 .val-title{font-size:14px;font-weight:700;color:var(--dk);margin-bottom:3px;text-align:center}
-.val-sub{font-size:9px;color:#888;text-align:center;line-height:1.4;margin-bottom:1rem}
-.val-prog-wrap{width:100%;height:3px;background:#EEE;border-radius:2px;overflow:hidden;margin-bottom:.85rem}
+.val-sub{font-size:9px;color:#888;text-align:center;line-height:1.4;margin-bottom:.85rem}
+.val-prog-wrap{width:100%;height:3px;background:#EEE;border-radius:2px;overflow:hidden;margin-bottom:.75rem}
 .val-prog{height:100%;background:var(--o);border-radius:2px;width:0%;transition:width .4s ease}
-.val-checks{width:100%;display:flex;flex-direction:column;gap:.35rem;margin-bottom:.85rem}
-.vchk{display:flex;align-items:center;gap:8px;padding:7px 10px;border-radius:7px;background:#F5F4F0;border:1px solid #EEE;transition:all .3s;opacity:0;transform:translateY(6px)}
+.val-checks{width:100%;display:flex;flex-direction:column;gap:.32rem;margin-bottom:.75rem}
+.vchk{display:flex;align-items:center;gap:8px;padding:7px 10px;border-radius:7px;background:#F5F4F0;border:1px solid #EEE;transition:all .3s;opacity:0;transform:translateY(5px)}
 .vchk.show{opacity:1;transform:translateY(0)}
 .vchk.pass{background:var(--gbg);border-color:var(--gbd)}
 .vci{width:18px;height:18px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:9px;flex-shrink:0}
-.vci-spin{width:13px;height:13px;border:2px solid #ddd;border-top-color:var(--o);border-radius:50%;animation:sp .6s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.vci-spin{width:13px;height:13px;border:2px solid #ddd;border-top-color:var(--o);border-radius:50%;animation:spin .6s linear infinite}
 .vci-pass{background:var(--g);color:#fff;font-size:10px}
 .vchk-t{font-size:10px;font-weight:500;color:var(--dk);flex:1}
 .vchk-d{font-size:8px;color:#aaa}
 .val-status{font-size:9px;color:#aaa;text-align:center;min-height:13px}
 
-/* SCENE 4 - ENTER BRIDGE */
-#s-enter{background:#fff;z-index:40}
+/* ── SCENE 4: BRIDGE ── */
+#s-enter{background:#fff;z-index:50}
+@keyframes edot{0%,100%{background:#DDD;transform:scale(1)}50%{background:var(--o);transform:scale(1.3)}}
 
-/* SCENE 5 - APP */
-#s-app{background:var(--bg);z-index:50;overflow-y:auto;align-items:stretch;justify-content:flex-start}
-.app-hdr{background:var(--dk);padding:.75rem 1.5rem;display:flex;align-items:center;gap:12px;border-bottom:3px solid var(--o);flex-shrink:0}
-.logo-t{color:#fff;font-size:16px;font-weight:700;letter-spacing:-.3px}
+/* ── SCENE 5: APP ── */
+#s-app{background:var(--bg);z-index:60;align-items:stretch;justify-content:flex-start;overflow:hidden}
+
+/* ── PRESENTER BAR ── */
+.pbar{
+  display:flex;align-items:center;gap:12px;
+  padding:.5rem 1.5rem;
+  background:#1a1a2e;
+  border-bottom:1px solid #2d2d4e;
+  flex-shrink:0;
+}
+.pbar-label{font-size:10px;font-weight:700;color:#475569;text-transform:uppercase;letter-spacing:.5px;white-space:nowrap}
+.pbar-routes{display:flex;gap:.35rem}
+.pr{display:flex;align-items:center;gap:5px;padding:4px 10px;border-radius:6px;font-size:10px;font-weight:700;cursor:pointer;border:1.5px solid transparent;transition:all .18s;color:#64748b;background:rgba(255,255,255,.04);white-space:nowrap}
+.pr:hover{border-color:rgba(255,255,255,.15);color:#94a3b8}
+.pr.sel.pr-n{background:rgba(30,158,94,.2);color:#4ADE80;border-color:rgba(30,158,94,.4)}
+.pr.sel.pr-h{background:rgba(26,92,176,.2);color:#60A5FA;border-color:rgba(26,92,176,.4)}
+.pr.sel.pr-c{background:rgba(192,57,43,.2);color:#F87171;border-color:rgba(192,57,43,.4)}
+.pr-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+.prd-n{background:#4ADE80}.prd-h{background:#60A5FA}.prd-c{background:#F87171}
+.pbar-sep{width:1px;height:16px;background:#2d2d4e}
+.pbar-hint{font-size:10px;color:#334155;flex:1}
+.pbar-restart{display:flex;align-items:center;gap:5px;padding:4px 11px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:6px;color:rgba(255,255,255,.5);font-size:10px;font-weight:600;cursor:pointer;font-family:inherit;transition:all .2s;white-space:nowrap}
+.pbar-restart:hover{background:rgba(255,255,255,.1);color:rgba(255,255,255,.8)}
+
+/* ── APP HEADER ── */
+.app-hdr{background:var(--dk);padding:.65rem 1.5rem;display:flex;align-items:center;gap:12px;border-bottom:3px solid var(--o);flex-shrink:0}
+.logo-t{color:#fff;font-size:15px;font-weight:700;letter-spacing:-.3px}
 .logo-s{color:#666;font-size:9px}
-.hdr-sep{width:1px;height:24px;background:#333;flex-shrink:0}
-.hdr-title{color:#888;font-size:12px;font-weight:500;white-space:nowrap}
-.route-pill{display:flex;align-items:center;gap:6px;padding:5px 14px;border-radius:8px;font-size:11px;font-weight:700;margin-left:auto;border:1.5px solid transparent;transition:all .3s;white-space:nowrap}
-.rp-h{display:none!important}
-.rp-n{background:rgba(30,158,94,.2);color:#4ADE80;border-color:rgba(30,158,94,.4);display:flex}
-.rp-hb{background:rgba(26,92,176,.2);color:#60A5FA;border-color:rgba(26,92,176,.4);display:flex}
-.rp-c{background:rgba(192,57,43,.2);color:#F87171;border-color:rgba(192,57,43,.4);display:flex}
-.step-nav{display:flex;align-items:center;background:#fff;border-bottom:1px solid var(--border);padding:0 1.5rem;overflow-x:auto;scrollbar-width:none;flex-shrink:0}
+.hdr-sep{width:1px;height:22px;background:#333;flex-shrink:0}
+.hdr-title{color:#888;font-size:12px;font-weight:500}
+
+/* ── STEP NAV ── */
+.step-nav{display:flex;align-items:center;background:#fff;border-bottom:1px solid var(--bd);padding:0 1.5rem;overflow-x:auto;scrollbar-width:none;flex-shrink:0}
 .step-nav::-webkit-scrollbar{display:none}
-.sni{display:flex;align-items:center;gap:5px;padding:.6rem .9rem;font-size:11px;font-weight:500;color:var(--fa);cursor:pointer;white-space:nowrap;border-bottom:2.5px solid transparent;transition:all .18s;flex-shrink:0}
+.sni{display:flex;align-items:center;gap:5px;padding:.55rem .85rem;font-size:11px;font-weight:500;color:var(--fa);cursor:pointer;white-space:nowrap;border-bottom:2.5px solid transparent;transition:all .18s;flex-shrink:0}
 .sni:hover{color:var(--mid)}
 .sni.active{color:var(--o);border-color:var(--o);font-weight:700}
 .sni.done{color:var(--g)}
 .sni-n{width:17px;height:17px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;flex-shrink:0;background:var(--lt);color:var(--fa);transition:all .18s}
 .sni.active .sni-n{background:var(--o);color:#fff}
 .sni.done .sni-n{background:var(--g);color:#fff}
-.sni-arrow{color:#DDD;margin:0 2px;font-size:10px}
-.app-main{display:grid;grid-template-columns:1fr 1fr;flex:1;min-height:0}
-.col-client{background:var(--lt);border-right:1px solid var(--border);display:flex;flex-direction:column;align-items:center;padding:1.25rem 1rem;overflow-y:auto}
+.sni-arr{color:#DDD;margin:0 1px;font-size:10px}
+
+/* ── MAIN SPLIT ── */
+.app-main{display:grid;grid-template-columns:1fr 1fr;flex:1;overflow:hidden}
+.col-client{background:var(--lt);border-right:1px solid var(--bd);display:flex;flex-direction:column;align-items:center;padding:1.25rem 1rem;overflow-y:auto}
 .col-int{background:#fff;display:flex;flex-direction:column;padding:1.25rem 1.5rem;overflow-y:auto}
 .col-lbl{display:flex;align-items:center;gap:6px;font-size:10px;font-weight:700;color:var(--fa);text-transform:uppercase;letter-spacing:.6px;margin-bottom:.9rem}
 .col-lbl-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
 .cld-o{background:var(--o)}.cld-b{background:var(--b)}
-.phone{width:290px;background:#fff;border-radius:24px;overflow:hidden;box-shadow:0 20px 56px rgba(0,0,0,.15),0 4px 16px rgba(0,0,0,.06),inset 0 0 0 1px rgba(0,0,0,.07)}
+
+/* ── PHONE MOCKUP ── */
+.phone{width:285px;background:#fff;border-radius:24px;overflow:hidden;box-shadow:0 20px 56px rgba(0,0,0,.14),0 4px 16px rgba(0,0,0,.05),inset 0 0 0 1px rgba(0,0,0,.07)}
 .ph-bar{height:4px;background:var(--dk)}
-.ph-hdr{background:var(--dk);padding:.7rem .9rem;display:flex;align-items:center;gap:7px}
+.ph-hdr{background:var(--dk);padding:.65rem .9rem;display:flex;align-items:center;gap:7px}
 .ph-lt{color:#fff;font-size:12px;font-weight:700}.ph-ls{color:#555;font-size:8px}
 .ph-badge{margin-left:auto;background:var(--o);color:#fff;font-size:8px;font-weight:700;padding:2px 7px;border-radius:9px}
 .ph-prog{height:2.5px;background:#E8E6E0}
 .ph-pf{height:100%;background:var(--o);transition:width .5s cubic-bezier(.4,0,.2,1)}
-.ph-dots{display:flex;align-items:center;gap:3px;padding:.4rem .85rem;background:#FAFAF8;border-bottom:1px solid #EEE}
+.ph-dots{display:flex;align-items:center;gap:3px;padding:.35rem .85rem;background:#FAFAF8;border-bottom:1px solid #EEE}
 .pd{width:5px;height:5px;border-radius:50%;background:#ddd}
 .pd.done{background:var(--g)}.pd.cur{background:var(--o);width:13px;border-radius:3px}
 .pd-lbl{margin-left:auto;font-size:8px;color:#bbb}
-.ph-body{padding:.95rem;min-height:420px}
+.ph-body{padding:.9rem;min-height:400px}
 .ph-foot{padding:.4rem .85rem;border-top:1px solid #EEE;text-align:center;font-size:8px;color:#ccc;background:#FAFAF8}
+
+/* ── PHONE CONTENT HELPERS ── */
 .ps-t{font-size:15px;font-weight:700;color:var(--dk);margin-bottom:3px;letter-spacing:-.3px}
 .ps-s{font-size:10px;color:var(--mid);margin-bottom:.8rem;line-height:1.5}
 .ps-sec{font-size:8px;font-weight:700;color:var(--fa);text-transform:uppercase;letter-spacing:.5px;margin-bottom:5px}
 .pbn{display:flex;gap:6px;padding:7px 9px;border-radius:6px;font-size:10px;line-height:1.45;margin-bottom:.65rem;align-items:flex-start}
 .pbn-g{background:var(--gbg);border:1px solid var(--gbd);color:#166534}
 .pbn-b{background:var(--bbg);border:1px solid var(--bbd);color:#1E40AF}
-.pbn-o{background:#FEF4E6;border:1px solid rgba(247,148,29,.4);color:#7A4500}
 .pbn-r{background:var(--rbg);border:1px solid var(--rbd);color:#991B1B}
 .pbn-ic{font-size:11px;flex-shrink:0;margin-top:1px}
-.pf{margin-bottom:.6rem}
+.pf{margin-bottom:.55rem}
 .pf label{font-size:8px;font-weight:700;color:var(--fa);text-transform:uppercase;letter-spacing:.4px;display:flex;align-items:center;gap:3px;margin-bottom:3px}
 .preq{color:var(--o);font-size:10px}
-.popt{font-size:7px;background:#f4f4f4;color:#bbb;padding:0 3px;border-radius:2px;border:1px solid #eee}
 .pfi{width:100%;padding:6px 9px;border:1px solid #ddd;border-radius:6px;font-size:11px;background:#fff;color:var(--dk);font-family:inherit}
 .pfi.ok{border-color:var(--g)}
+.pfb{font-size:9px;margin-top:2px;margin-bottom:4px;min-height:12px}
 .psel{width:100%;padding:6px 9px;border:1px solid #ddd;border-radius:6px;font-size:11px;background:#fff;color:var(--dk);font-family:inherit}
 .pg2{display:grid;grid-template-columns:1fr 1fr;gap:7px}
 .pbtn{width:100%;padding:9px;background:var(--o);color:#fff;border:none;border-radius:7px;font-size:11px;font-weight:700;cursor:pointer;margin-top:.6rem;font-family:inherit}
-.pbtn-dk{background:var(--dk)}.pbtn-out{background:transparent;color:var(--mid);border:1px solid #ddd;margin-top:4px}
-.dbtns{display:grid;grid-template-columns:1fr 1fr;gap:4px;margin-bottom:.6rem}
+.pbtn:hover{opacity:.92}
+.pbtn-dk{background:var(--dk)}
+.pbtn-out{background:transparent;color:var(--mid);border:1px solid #ddd;margin-top:4px}
+.dbtns{display:grid;grid-template-columns:1fr 1fr;gap:4px;margin-bottom:.55rem}
 .dbtn{padding:5px 7px;border:1px solid #ddd;border-radius:5px;font-size:9px;cursor:pointer;background:#fff;color:var(--mid);font-family:inherit}
 .dbtn.sel{border-color:var(--o);background:#FEF4E6;color:#7A4500;font-weight:700}
-.ppills{display:flex;flex-wrap:wrap;gap:3px;margin-top:3px;margin-bottom:.6rem}
+.ppills{display:flex;flex-wrap:wrap;gap:3px;margin-top:3px;margin-bottom:.55rem}
 .ppill{padding:2px 7px;border:1px solid #ddd;border-radius:10px;font-size:9px;cursor:pointer;background:#fff;color:var(--mid);font-family:inherit}
 .ppill.sel{background:var(--o);border-color:var(--o);color:#fff;font-weight:700}
-.otp-g{display:grid;grid-template-columns:repeat(6,1fr);gap:4px;margin:7px 0}
-.otp-i{text-align:center;font-size:16px;font-weight:700;padding:8px 2px;border:1.5px solid #ddd;border-radius:6px;background:#fff;width:100%}
-.spinner{width:22px;height:22px;border:2.5px solid #eee;border-top-color:var(--o);border-radius:50%;animation:sp .75s linear infinite;margin:0 auto 10px}
 .dtbl{background:#FAFAF8;border:1px solid #eee;border-radius:6px;overflow:hidden;margin-bottom:.65rem}
-.dr{display:flex;justify-content:space-between;padding:4px 9px;font-size:10px;border-bottom:1px solid #eee}
-.dr:last-child{border:none}
-.dl{color:var(--mid)}.dv{font-weight:600;color:var(--dk)}
+.dtr{display:flex;justify-content:space-between;padding:4px 9px;font-size:10px;border-bottom:1px solid #eee}
+.dtr:last-child{border:none}
+.dtl{color:var(--mid)}.dtv{font-weight:600;color:var(--dk)}
 .av{width:34px;height:34px;border-radius:50%;background:#FEF4E6;border:1.5px solid var(--o);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:var(--o)}
 .vpil{display:inline-flex;align-items:center;gap:2px;font-size:8px;padding:1px 5px;border-radius:8px;background:var(--gbg);color:var(--g);font-weight:700;margin-top:2px}
-.sm-sec{border:1px solid #eee;border-radius:7px;overflow:hidden;margin-bottom:.5rem}
-.sm-hd{display:flex;align-items:center;justify-content:space-between;padding:.45rem .7rem;background:#FAFAF8;border-bottom:1px solid #eee}
-.sm-hdl{display:flex;align-items:center;gap:6px}
-.sm-ico{width:20px;height:20px;border-radius:5px;display:flex;align-items:center;justify-content:center;font-size:10px}
-.si1{background:#FEF4E6}.si2{background:var(--bbg)}.si3{background:var(--gbg)}.si4{background:var(--pubg)}
-.sm-title{font-size:10px;font-weight:700}
-.sm-badge{font-size:8px;padding:1px 4px;border-radius:8px;background:var(--gbg);color:var(--g);font-weight:700}
-.sm-edit{font-size:9px;color:var(--o);background:none;border:1px solid rgba(247,148,29,.3);border-radius:4px;padding:1px 6px;cursor:pointer;font-family:inherit}
-.sm-bd{padding:.45rem .7rem}
-.sm-r{display:flex;justify-content:space-between;padding:2px 0;font-size:9px;border-bottom:1px solid #f5f5f5}
-.sm-r:last-child{border:none}
-.sml{color:var(--mid)}.smv{font-weight:600;color:var(--dk);text-align:right}
-.smv.e{font-weight:400;color:#bbb;font-style:italic}
-.tbox{background:#1A2234;border-radius:6px;overflow:hidden;margin-bottom:.65rem}
-.tbox-hd{padding:5px 9px;background:#111827;color:#94A3B8;font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:.4px}
-.tbox-r{display:flex;justify-content:space-between;padding:4px 9px;font-size:9px;border-bottom:1px solid #1e293b}
-.tbox-l{color:#64748b}.tbox-v{font-weight:600;color:#E2E8F0}
-.sec-list{display:flex;flex-direction:column;gap:4px;margin-bottom:.65rem}
-.sec-i{display:flex;gap:6px;align-items:flex-start;font-size:10px;color:var(--mid)}
-.rate-bar{display:flex;justify-content:space-between;align-items:center;padding:5px 9px;border-radius:6px;font-size:10px;margin-bottom:.6rem;background:#FEF4E6;border:1px solid rgba(247,148,29,.3);color:#7A4500}
 .id-tg{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-bottom:.65rem}
-.id-tc{padding:10px 8px;border:1.5px solid #ddd;border-radius:8px;cursor:pointer;text-align:center;background:#fff;transition:all .15s}
+.id-tc{padding:9px 8px;border:1.5px solid #ddd;border-radius:8px;cursor:pointer;text-align:center;background:#fff}
 .id-tc.sel{border-color:var(--o);background:#FEF4E6}
-.itc-ic{font-size:16px;margin-bottom:3px}
+.itc-ic{font-size:15px;margin-bottom:2px}
 .itc-l{font-size:10px;font-weight:700}
 .itc-s{font-size:8px;color:var(--mid);margin-top:1px}
-.pfb{font-size:9px;margin-top:-4px;margin-bottom:6px;min-height:13px}
-.sim-box{background:#F5F4F0;border:1px solid #ddd;border-radius:7px;padding:.55rem;margin-bottom:.65rem}
-.sim-bt{font-size:8px;font-weight:700;color:var(--fa);text-transform:uppercase;letter-spacing:.4px;margin-bottom:4px}
-.sim-chips{display:flex;flex-direction:column;gap:3px}
-.sch{padding:5px 8px;border:1px solid #ddd;border-radius:6px;font-size:9px;cursor:pointer;background:#fff;color:var(--mid);font-family:inherit;display:flex;align-items:center;gap:6px}
-.sch.sel{border-color:var(--o);background:#FEF4E6;color:#7A4500;font-weight:700}
-.sch-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
-.sd-n{background:var(--g)}.sd-h{background:var(--b)}.sd-c{background:var(--r)}
-.sf-wrap{display:flex;flex-direction:column;gap:5px;margin:.65rem 0}
+.sf-wrap{display:flex;flex-direction:column;gap:.4rem;margin:.6rem 0}
 .sf-step{display:flex;gap:7px;align-items:flex-start;font-size:10px;color:var(--mid)}
 .sf-num{width:17px;height:17px;border-radius:50%;background:var(--o);color:#fff;font-size:9px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px}
 .prof-box{background:#FAFAF8;border:1px solid #eee;border-radius:6px;overflow:hidden;margin-bottom:.65rem}
 .prof-hd{padding:5px 9px;background:var(--dk);color:#fff;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.4px}
 .succ-ico{width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto .65rem;font-size:20px}
+.sm-sec{border:1px solid #eee;border-radius:7px;overflow:hidden;margin-bottom:.45rem}
+.sm-hd{display:flex;align-items:center;justify-content:space-between;padding:.4rem .65rem;background:#FAFAF8;border-bottom:1px solid #eee}
+.sm-hdl{display:flex;align-items:center;gap:5px}
+.sm-ico{width:18px;height:18px;border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:9px}
+.si1{background:#FEF4E6}.si2{background:var(--bbg)}.si3{background:var(--gbg)}.si4{background:var(--pubg)}
+.sm-title{font-size:10px;font-weight:700}
+.sm-badge{font-size:8px;padding:1px 4px;border-radius:8px;background:var(--gbg);color:var(--g);font-weight:700}
+.sm-edit{font-size:9px;color:var(--o);background:none;border:1px solid rgba(247,148,29,.3);border-radius:4px;padding:1px 5px;cursor:pointer;font-family:inherit}
+.sm-bd{padding:.4rem .65rem}
+.sm-r{display:flex;justify-content:space-between;padding:2px 0;font-size:9px;border-bottom:1px solid #f5f5f5}
+.sm-r:last-child{border:none}
+.sml{color:var(--mid)}.smv{font-weight:600;color:var(--dk);text-align:right}
+@keyframes spin2{to{transform:rotate(360deg)}}
+.spinner{width:22px;height:22px;border:2.5px solid #eee;border-top-color:var(--o);border-radius:50%;animation:spin2 .75s linear infinite;margin:0 auto 10px}
 
-/* INTERNAL PANEL */
-.ph-hdr2{display:flex;align-items:center;gap:10px;padding:.65rem .9rem;border-radius:9px;margin-bottom:.9rem;background:var(--lt);border:1px solid var(--border)}
-.ph-pulse{width:9px;height:9px;border-radius:50%;flex-shrink:0;animation:pp 1.5s ease-in-out infinite}
+/* ── INTERNAL PANEL COMPONENTS ── */
+.ph-hdr2{display:flex;align-items:center;gap:10px;padding:.6rem .85rem;border-radius:9px;margin-bottom:.85rem;background:var(--lt);border:1px solid var(--bd)}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.5;transform:scale(.85)}}
+.ph-pulse{width:9px;height:9px;border-radius:50%;flex-shrink:0;animation:pulse 1.5s ease-in-out infinite}
 .pp-p{background:var(--o)}.pp-i{background:var(--b)}.pp-a{background:var(--g)}.pp-d{background:var(--pu)}.pp-dn{background:#999;animation:none}
 .ph-lbl{font-size:10px;color:var(--mid)}.ph-val{font-size:12px;font-weight:700;color:var(--dk)}
 .ph-tag{margin-left:auto;font-size:9px;font-weight:700;padding:2px 8px;border-radius:10px;white-space:nowrap}
-.pht-p{background:#FEF4E6;color:#7A4500}.pht-i{background:var(--bbg);color:#1E40AF}.pht-a{background:var(--gbg);color:#166534}.pht-d{background:var(--pubg);color:#5B21B6}.pht-dn{background:var(--lt);color:var(--mid)}
-.proc-steps{display:flex;flex-direction:column;gap:.45rem;margin-bottom:.85rem}
-.ps{display:flex;align-items:flex-start;gap:9px;padding:.65rem .8rem;border-radius:8px;border:1px solid var(--border);background:var(--lt);transition:all .25s}
+.pht-p{background:#FEF4E6;color:#7A4500}.pht-i{background:var(--bbg);color:#1E40AF}
+.pht-a{background:var(--gbg);color:#166534}.pht-d{background:var(--pubg);color:#5B21B6}.pht-dn{background:var(--lt);color:var(--mid)}
+.proc-steps{display:flex;flex-direction:column;gap:.4rem;margin-bottom:.8rem}
+.ps{display:flex;align-items:flex-start;gap:9px;padding:.6rem .75rem;border-radius:8px;border:1px solid var(--bd);background:var(--lt);transition:all .25s}
 .ps.act{background:#fff;border-color:var(--o);box-shadow:0 2px 12px rgba(247,148,29,.1)}
-.ps.done{opacity:.45}
+.ps.done{opacity:.42}
 .ps.blk{background:var(--rbg);border-color:var(--rbd)}
 .ps.api{background:var(--gbg);border-color:var(--gbd)}
 .ps.api.act{background:#fff;border-color:var(--g);box-shadow:0 2px 12px rgba(30,158,94,.1)}
 .ps.dec{background:var(--pubg);border-color:var(--pubd)}
 .ps.dec.act{background:#fff;border-color:var(--pu);box-shadow:0 2px 12px rgba(124,58,237,.1)}
-.ps-ico{width:30px;height:30px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0}
+.ps-ico{width:28px;height:28px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0}
 .psi-p{background:#FEF4E6}.psi-i{background:var(--bbg)}.psi-a{background:var(--gbg)}.psi-d{background:var(--pubg)}.psi-b{background:var(--rbg)}
 .ps-con{flex:1}
 .ps-t2{font-size:12px;font-weight:700;color:var(--dk);margin-bottom:2px}
 .ps-d{font-size:11px;color:var(--mid);line-height:1.4}
-.ps-typ{font-size:8px;font-weight:700;padding:1px 5px;border-radius:4px;margin-top:4px;display:inline-block;text-transform:uppercase;letter-spacing:.3px}
-.pty-p{background:#FEF4E6;color:#7A4500}.pty-i{background:var(--bbg);color:#1E40AF}.pty-a{background:var(--gbg);color:#166534}.pty-d{background:var(--pubg);color:#5B21B6}.pty-b{background:var(--rbg);color:#991B1B}
-.ps-st{width:20px;height:20px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;flex-shrink:0;margin-top:5px}
-.pss-act{background:var(--o);color:#fff;animation:pp 1.2s ease-in-out infinite}
+.ps-typ{font-size:8px;font-weight:700;padding:1px 5px;border-radius:4px;margin-top:3px;display:inline-block;text-transform:uppercase;letter-spacing:.3px}
+.pty-p{background:#FEF4E6;color:#7A4500}.pty-i{background:var(--bbg);color:#1E40AF}
+.pty-a{background:var(--gbg);color:#166534}.pty-d{background:var(--pubg);color:#5B21B6}.pty-b{background:var(--rbg);color:#991B1B}
+.ps-st{width:20px;height:20px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;flex-shrink:0;margin-top:4px}
+.pss-act{background:var(--o);color:#fff;animation:pulse 1.2s ease-in-out infinite}
 .pss-done{background:var(--g);color:#fff}
-.pss-wait{background:var(--lt);color:var(--fa);border:1px solid var(--border)}
+.pss-wait{background:var(--lt);color:var(--fa);border:1px solid var(--bd)}
 .pss-blk{background:var(--r);color:#fff}
-.api-card{background:#fff;border:1px solid var(--border);border-radius:8px;overflow:hidden;margin-bottom:.75rem}
-.api-hdr{display:flex;align-items:center;gap:8px;padding:.45rem .8rem;background:#0F172A;font-size:10px;font-family:monospace}
+.api-card{background:#fff;border:1px solid var(--bd);border-radius:8px;overflow:hidden;margin-bottom:.65rem}
+.api-hdr{display:flex;align-items:center;gap:8px;padding:.4rem .75rem;background:#0F172A;font-size:10px;font-family:monospace}
 .api-m{font-weight:700;color:#FB923C}.api-u{color:#7DD3FC;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.api-st{padding:2px 7px;border-radius:4px;font-size:9px;font-weight:700;flex-shrink:0}
+.api-st{padding:2px 6px;border-radius:4px;font-size:9px;font-weight:700;flex-shrink:0}
 .as-ok{background:rgba(74,222,128,.15);color:#4ADE80}.as-pend{background:rgba(251,146,60,.15);color:#FB923C}
 .api-bdy{display:grid;grid-template-columns:1fr 1fr;gap:0}
-.api-req,.api-res{padding:.45rem .8rem;font-size:9px;font-family:monospace;line-height:1.6}
-.api-req{border-right:1px solid var(--border);background:#FAFAF8}
-.api-ht{font-size:8px;font-weight:700;color:var(--fa);text-transform:uppercase;letter-spacing:.4px;margin-bottom:4px}
+.api-req,.api-res{padding:.4rem .75rem;font-size:9px;font-family:monospace;line-height:1.6}
+.api-req{border-right:1px solid var(--bd);background:#FAFAF8}
+.api-ht{font-size:8px;font-weight:700;color:var(--fa);text-transform:uppercase;letter-spacing:.4px;margin-bottom:3px}
 .ak{color:#1E40AF}.av2{color:#166534}
-.dec-block{background:#fff;border:1px solid var(--pubd);border-radius:8px;overflow:hidden;margin-bottom:.75rem}
-.dec-hdr{padding:.45rem .8rem;background:var(--pubg);border-bottom:1px solid var(--pubd);font-size:10px;font-weight:700;color:var(--pu);display:flex;align-items:center;gap:6px}
-.dec-opts{padding:.55rem .8rem;display:flex;flex-direction:column;gap:.35rem}
-.dec-opt{display:flex;align-items:center;gap:7px;padding:.35rem .6rem;border-radius:6px;font-size:11px;border:1px solid transparent;transition:all .2s}
+.dec-block{background:#fff;border:1px solid var(--pubd);border-radius:8px;overflow:hidden;margin-bottom:.7rem}
+.dec-hdr{padding:.4rem .75rem;background:var(--pubg);border-bottom:1px solid var(--pubd);font-size:10px;font-weight:700;color:var(--pu)}
+.dec-opts{padding:.5rem .75rem;display:flex;flex-direction:column;gap:.3rem}
+.dec-opt{display:flex;align-items:center;gap:7px;padding:.32rem .55rem;border-radius:6px;font-size:11px;border:1px solid transparent;transition:all .2s}
 .dec-opt.chosen{font-weight:700}
 .do-n.chosen{background:var(--gbg);border-color:var(--gbd);color:#166534}
 .do-h.chosen{background:var(--bbg);border-color:var(--bbd);color:#1E40AF}
 .do-c.chosen{background:var(--rbg);border-color:var(--rbd);color:#991B1B}
-.dec-opt:not(.chosen){opacity:.35}
-.dd{width:9px;height:9px;border-radius:50%;flex-shrink:0}
+.dec-opt:not(.chosen){opacity:.32}
+.dd{width:8px;height:8px;border-radius:50%;flex-shrink:0}
 .dd-n{background:var(--g)}.dd-h{background:var(--b)}.dd-c{background:var(--r)}
-.dec-result{padding:.45rem .8rem;border-top:1px solid var(--pubd);font-size:11px;font-weight:700;display:flex;align-items:center;gap:6px}
-.co{display:flex;gap:8px;padding:.6rem .8rem;border-radius:8px;font-size:11px;line-height:1.5;margin-bottom:.75rem;align-items:flex-start}
+.dec-result{padding:.4rem .75rem;border-top:1px solid var(--pubd);font-size:11px;font-weight:700;display:flex;align-items:center;gap:6px}
+.co{display:flex;gap:8px;padding:.55rem .75rem;border-radius:8px;font-size:11px;line-height:1.5;margin-bottom:.65rem;align-items:flex-start}
 .co-ic{font-size:13px;flex-shrink:0;margin-top:1px}
 .co-na{background:var(--rbg);border:1px solid var(--rbd);color:#991B1B}
 .co-sv{background:var(--gbg);border:1px solid var(--gbd);color:#166534}
 .co-in{background:var(--bbg);border:1px solid var(--bbd);color:#1E40AF}
-.vci2{display:flex;align-items:center;gap:8px;padding:.35rem .6rem;border-radius:6px;font-size:11px;background:var(--lt);border:1px solid var(--border);margin-bottom:.3rem}
+.vci2{display:flex;align-items:center;gap:8px;padding:.32rem .55rem;border-radius:6px;font-size:11px;background:var(--lt);border:1px solid var(--bd);margin-bottom:.28rem}
 .vci2.pass{background:var(--gbg);border-color:var(--gbd);color:#166534}
-.vci2.pend{background:#FFFBEB;border-color:#FDE68A;color:#92400E}
 .vci2-ic{font-size:12px;flex-shrink:0}.vci2-l{flex:1;font-weight:500}.vci2-d{font-size:9px}
-.audit{background:#0F172A;border-radius:8px;padding:.6rem .8rem;margin-bottom:.75rem}
-.audit-t{font-size:9px;font-weight:700;color:#475569;text-transform:uppercase;letter-spacing:.4px;margin-bottom:.45rem}
+.audit{background:#0F172A;border-radius:8px;padding:.55rem .75rem;margin-bottom:.65rem}
+.audit-t{font-size:9px;font-weight:700;color:#475569;text-transform:uppercase;letter-spacing:.4px;margin-bottom:.4rem}
 .al{display:flex;gap:7px;padding:3px 0;font-size:9px;font-family:monospace;border-bottom:1px solid #1E293B}
 .al:last-child{border:none}
 .al-tm{color:#334155;flex-shrink:0;width:40px}
@@ -317,134 +357,212 @@ html,body{height:100%;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sa
 .alb-blk{background:rgba(248,113,113,.2);color:#F87171}
 .al-msg{color:#94A3B8;flex:1;line-height:1.4}
 .al-h{color:#E2E8F0}.al-g{color:#4ADE80}.al-r{color:#F87171}.al-y{color:#FB923C}
-.db-spotlight{background:linear-gradient(135deg,#1a1a2e,#16213e);border:2px solid var(--pu);border-radius:10px;padding:.85rem;margin-bottom:.85rem}
-.db-spot-t{font-size:12px;font-weight:700;color:#c084fc;margin-bottom:.5rem;display:flex;align-items:center;gap:6px}
-.db-spot-s{font-size:11px;color:#94A3B8;margin-bottom:.65rem;line-height:1.5}
-.db-steps{display:flex;flex-direction:column;gap:.35rem}
+.db-spotlight{background:linear-gradient(135deg,#1a1a2e,#16213e);border:2px solid var(--pu);border-radius:10px;padding:.8rem;margin-bottom:.8rem}
+.db-spot-t{font-size:12px;font-weight:700;color:#c084fc;margin-bottom:.45rem;display:flex;align-items:center;gap:6px}
+.db-spot-s{font-size:11px;color:#94A3B8;margin-bottom:.6rem;line-height:1.5}
+.db-steps{display:flex;flex-direction:column;gap:.32rem}
 .dbs{display:flex;align-items:center;gap:8px;font-size:10px;padding:5px 8px;border-radius:6px;background:rgba(255,255,255,.05)}
 .dbs-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
 .dbs.ok{color:#4ADE80}.dbs.ok .dbs-dot{background:#4ADE80}
-.dbs.pend{color:#FB923C}.dbs.pend .dbs-dot{background:#FB923C;animation:pp 1s ease-in-out infinite}
+.dbs.pend{color:#FB923C}.dbs.pend .dbs-dot{background:#FB923C;animation:pulse 1s ease-in-out infinite}
 .dbs.skip{color:#475569}.dbs.skip .dbs-dot{background:#475569}
-.nav-bar{display:flex;align-items:center;gap:8px;padding:.7rem 1.5rem;background:#fff;border-top:1px solid var(--border);flex-shrink:0}
-.nav-prev,.nav-next{padding:8px 20px;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;transition:all .15s;font-family:inherit}
-.nav-prev{background:var(--lt);color:var(--mid);border:1px solid var(--border)}
+
+/* ── KEY MOMENT BADGE ── */
+.key-moment{display:flex;align-items:center;gap:7px;padding:.5rem .85rem;background:linear-gradient(90deg,rgba(124,58,237,.15),rgba(124,58,237,.05));border:1px solid var(--pubd);border-radius:8px;margin-bottom:.75rem;font-size:11px;font-weight:700;color:var(--pu)}
+
+/* ── NAV BAR ── */
+.nav-bar{display:flex;align-items:center;gap:8px;padding:.65rem 1.5rem;background:#fff;border-top:1px solid var(--bd);flex-shrink:0}
+.nav-prev,.nav-next{padding:7px 18px;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;transition:all .15s;font-family:inherit}
+.nav-prev{background:var(--lt);color:var(--mid);border:1px solid var(--bd)}
 .nav-prev:hover{border-color:var(--o);color:var(--o)}
 .nav-next{background:var(--o);color:#fff;border:none}
 .nav-next:hover{opacity:.9}
 .nav-ctr{flex:1;text-align:center;font-size:11px;color:var(--fa)}
+
 </style>
 </head>
 <body>
 
-<!-- SCENE 1: CONFERENCE -->
-<div id="s-conf" class="scene on">
-  <div style="position:absolute;inset:0;overflow:hidden;pointer-events:none">
-    <div class="cbg-c c1"></div><div class="cbg-c c2"></div>
+<!-- ══════════════════════════
+     SCENE 0 — PRESENTER SETUP
+══════════════════════════ -->
+<div id="s-setup" class="scene active">
+  <div class="setup-card">
+    <div class="setup-hdr">
+      <div class="setup-hdr-logo">
+        <svg width="24" height="24" viewBox="0 0 26 26" fill="none"><circle cx="13" cy="13" r="12" stroke="#F7941D" stroke-width="1.8"/><circle cx="13" cy="13" r="6.5" fill="#F7941D"/><rect x="10.5" y="7" width="5" height="11" rx="2.75" fill="#1E1E1E"/></svg>
+        <div><div class="setup-hdr-t">healthbridge</div><div class="setup-hdr-s">good business. best practice.</div></div>
+      </div>
+      <div style="margin-left:auto;font-size:12px;font-weight:700;color:rgba(247,148,29,.8);background:rgba(247,148,29,.1);padding:4px 10px;border-radius:6px;border:1px solid rgba(247,148,29,.25)">Demo Setup</div>
+    </div>
+    <div class="setup-body">
+      <div class="setup-section">
+        <div class="setup-section-t">1. Choose a route to demonstrate</div>
+        <div class="route-options">
+          <div class="route-opt sel-n" data-route="new">
+            <div class="route-dot rd-n"></div>
+            <div>
+              <div class="route-opt-t">Route 1 &mdash; New client to Healthbridge</div>
+              <div class="route-opt-s">Provider has no existing HB account. Goes through the full sign-up flow including professional and practice details.</div>
+            </div>
+          </div>
+          <div class="route-opt" data-route="hb">
+            <div class="route-dot rd-h"></div>
+            <div>
+              <div class="route-opt-t">Route 2 &mdash; Existing Healthbridge client</div>
+              <div class="route-opt-s">Provider already uses another HB product. Profile is pre-filled. Reduced number of steps.</div>
+            </div>
+          </div>
+          <div class="route-opt" data-route="clin">
+            <div class="route-dot rd-c"></div>
+            <div>
+              <div class="route-opt-t">Route 3 &mdash; Already on Healthbridge Clinical</div>
+              <div class="route-opt-s">Provider already has an active Clinical account. Registration is blocked and they are directed to sign in.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="setup-section" style="margin-bottom:0">
+        <div class="setup-section-t">2. Choose the campaign source</div>
+        <div class="src-row">
+          <button class="src-btn sel" data-src="conf">Conference</button>
+          <button class="src-btn" data-src="social">Social media</button>
+          <button class="src-btn" data-src="sales">Sales card</button>
+          <button class="src-btn" data-src="email">Email</button>
+        </div>
+      </div>
+    </div>
+    <div class="setup-footer">
+      <button class="start-btn" id="start-demo-btn">
+        Start demo &nbsp; &#8594;
+      </button>
+    </div>
   </div>
-  <div class="conf-banner">
-    <div class="conf-event" id="src-event">MedAfrica Conference 2026</div>
+</div>
+
+<!-- ══════════════════════════
+     SCENE 1 — CONFERENCE FLYER
+══════════════════════════ -->
+<div id="s-conf" class="scene">
+  <div class="cbg"><div class="cbc c1"></div><div class="cbc c2"></div></div>
+  <div class="conf-text">
+    <div class="conf-event" id="conf-event-lbl">MedAfrica Conference 2026</div>
     <div class="conf-title">Go digital.<br>Start for free.</div>
-    <div class="conf-sub">Healthbridge Clinical — your EMR, your way.</div>
-    <div class="conf-loc" id="src-loc">📍 Sandton Convention Centre · Booth 14B</div>
+    <div class="conf-sub">Healthbridge Clinical &mdash; your EMR, your way.</div>
   </div>
   <div class="flyer">
     <div class="fy-hdr">
-      <svg width="20" height="20" viewBox="0 0 26 26" fill="none"><circle cx="13" cy="13" r="12" stroke="#F7941D" stroke-width="1.8"/><circle cx="13" cy="13" r="6.5" fill="#F7941D"/><rect x="10.5" y="7" width="5" height="11" rx="2.75" fill="#1E1E1E"/></svg>
+      <svg width="18" height="18" viewBox="0 0 26 26" fill="none"><circle cx="13" cy="13" r="12" stroke="#F7941D" stroke-width="1.8"/><circle cx="13" cy="13" r="6.5" fill="#F7941D"/><rect x="10.5" y="7" width="5" height="11" rx="2.75" fill="#1E1E1E"/></svg>
       <div><div class="fy-lt">healthbridge</div><div class="fy-ls">good business. best practice.</div></div>
+      <div style="margin-left:auto;background:var(--o);color:#fff;font-size:7px;font-weight:700;padding:2px 7px;border-radius:9px">Free Sign-Up</div>
     </div>
     <div class="fy-body">
       <div class="fy-h">Sign up in under 5 minutes</div>
-      <div class="fy-s">Free clinical EMR for SA providers. DHA verified. POPIA compliant.</div>
+      <div class="fy-s">Free clinical EMR for SA providers.<br>DHA verified &middot; POPIA compliant.</div>
       <div class="fy-badge">Free forever</div>
-      <div class="qr-wrap" id="qr-wrap">
+      <div class="qr-wrap" id="qr-tap">
         <div class="qr-frame">
-          <div class="qr-scan-line"></div>
-          <div class="qr-inner">
-            <svg width="126" height="126" viewBox="0 0 41 41" xmlns="http://www.w3.org/2000/svg" shape-rendering="crispEdges">
-              <rect x="1" y="1" width="7" height="7" fill="#1E1E1E"/><rect x="2" y="2" width="5" height="5" fill="white"/><rect x="3" y="3" width="3" height="3" fill="#1E1E1E"/>
-              <rect x="33" y="1" width="7" height="7" fill="#1E1E1E"/><rect x="34" y="2" width="5" height="5" fill="white"/><rect x="35" y="3" width="3" height="3" fill="#1E1E1E"/>
-              <rect x="1" y="33" width="7" height="7" fill="#1E1E1E"/><rect x="2" y="34" width="5" height="5" fill="white"/><rect x="3" y="35" width="3" height="3" fill="#1E1E1E"/>
-              <rect x="17" y="17" width="7" height="7" rx="1.5" fill="#1E1E1E"/>
-              <circle cx="20.5" cy="20.5" r="2.8" fill="#F7941D"/>
-              <rect x="9" y="1" width="1" height="1" fill="#1E1E1E"/><rect x="11" y="1" width="1" height="1" fill="#1E1E1E"/><rect x="13" y="1" width="2" height="1" fill="#1E1E1E"/><rect x="17" y="1" width="1" height="1" fill="#1E1E1E"/><rect x="21" y="1" width="2" height="1" fill="#1E1E1E"/><rect x="25" y="1" width="1" height="1" fill="#1E1E1E"/><rect x="29" y="1" width="1" height="1" fill="#1E1E1E"/>
-              <rect x="9" y="3" width="2" height="1" fill="#1E1E1E"/><rect x="13" y="3" width="1" height="1" fill="#1E1E1E"/><rect x="20" y="3" width="3" height="1" fill="#1E1E1E"/><rect x="25" y="3" width="2" height="1" fill="#1E1E1E"/>
-              <rect x="9" y="5" width="1" height="1" fill="#1E1E1E"/><rect x="11" y="5" width="2" height="1" fill="#1E1E1E"/><rect x="15" y="5" width="2" height="1" fill="#1E1E1E"/><rect x="25" y="5" width="1" height="1" fill="#1E1E1E"/>
-              <rect x="1" y="9" width="1" height="1" fill="#1E1E1E"/><rect x="3" y="9" width="1" height="1" fill="#1E1E1E"/><rect x="5" y="9" width="1" height="1" fill="#1E1E1E"/><rect x="9" y="9" width="1" height="1" fill="#1E1E1E"/><rect x="13" y="9" width="2" height="1" fill="#1E1E1E"/>
-              <rect x="9" y="11" width="2" height="1" fill="#1E1E1E"/><rect x="25" y="9" width="2" height="1" fill="#1E1E1E"/><rect x="29" y="9" width="2" height="1" fill="#1E1E1E"/>
-              <rect x="9" y="25" width="1" height="1" fill="#1E1E1E"/><rect x="25" y="25" width="2" height="1" fill="#1E1E1E"/>
-              <rect x="9" y="27" width="2" height="1" fill="#1E1E1E"/><rect x="25" y="27" width="1" height="1" fill="#1E1E1E"/><rect x="28" y="27" width="2" height="1" fill="#1E1E1E"/>
-              <rect x="9" y="29" width="1" height="1" fill="#1E1E1E"/><rect x="25" y="29" width="2" height="1" fill="#1E1E1E"/><rect x="29" y="29" width="1" height="1" fill="#1E1E1E"/>
-              <rect x="9" y="33" width="1" height="1" fill="#1E1E1E"/><rect x="11" y="33" width="1" height="1" fill="#1E1E1E"/><rect x="25" y="33" width="1" height="1" fill="#1E1E1E"/>
-            </svg>
-          </div>
-          <div class="qr-hover"><span style="font-size:20px">📱</span><span class="qr-hover-t">Tap to scan</span></div>
+          <div class="qr-scan"></div>
+          <svg width="124" height="124" viewBox="0 0 41 41" xmlns="http://www.w3.org/2000/svg" shape-rendering="crispEdges">
+<rect x="1" y="1" width="7" height="7" fill="#1E1E1E"/><rect x="2" y="2" width="5" height="5" fill="white"/><rect x="3" y="3" width="3" height="3" fill="#1E1E1E"/>
+<rect x="33" y="1" width="7" height="7" fill="#1E1E1E"/><rect x="34" y="2" width="5" height="5" fill="white"/><rect x="35" y="3" width="3" height="3" fill="#1E1E1E"/>
+<rect x="1" y="33" width="7" height="7" fill="#1E1E1E"/><rect x="2" y="34" width="5" height="5" fill="white"/><rect x="3" y="35" width="3" height="3" fill="#1E1E1E"/>
+<rect x="17" y="17" width="7" height="7" rx="1.5" fill="#1E1E1E"/>
+<circle cx="20.5" cy="20.5" r="2.8" fill="#F7941D"/>
+<rect x="9" y="1" width="1" height="1" fill="#1E1E1E"/><rect x="11" y="1" width="1" height="1" fill="#1E1E1E"/><rect x="13" y="1" width="2" height="1" fill="#1E1E1E"/>
+<rect x="17" y="1" width="1" height="1" fill="#1E1E1E"/><rect x="21" y="1" width="2" height="1" fill="#1E1E1E"/>
+<rect x="9" y="3" width="2" height="1" fill="#1E1E1E"/><rect x="13" y="3" width="1" height="1" fill="#1E1E1E"/><rect x="20" y="3" width="3" height="1" fill="#1E1E1E"/>
+<rect x="9" y="5" width="1" height="1" fill="#1E1E1E"/><rect x="11" y="5" width="2" height="1" fill="#1E1E1E"/><rect x="15" y="5" width="2" height="1" fill="#1E1E1E"/>
+<rect x="1" y="9" width="1" height="1" fill="#1E1E1E"/><rect x="3" y="9" width="1" height="1" fill="#1E1E1E"/><rect x="5" y="9" width="1" height="1" fill="#1E1E1E"/>
+<rect x="9" y="9" width="1" height="1" fill="#1E1E1E"/><rect x="13" y="9" width="2" height="1" fill="#1E1E1E"/>
+<rect x="9" y="11" width="2" height="1" fill="#1E1E1E"/><rect x="25" y="9" width="2" height="1" fill="#1E1E1E"/>
+<rect x="9" y="25" width="1" height="1" fill="#1E1E1E"/><rect x="11" y="25" width="2" height="1" fill="#1E1E1E"/>
+<rect x="9" y="27" width="2" height="1" fill="#1E1E1E"/><rect x="25" y="27" width="1" height="1" fill="#1E1E1E"/>
+<rect x="9" y="33" width="1" height="1" fill="#1E1E1E"/><rect x="25" y="33" width="2" height="1" fill="#1E1E1E"/>
+<rect x="25" y="3" width="2" height="1" fill="#1E1E1E"/><rect x="29" y="9" width="2" height="1" fill="#1E1E1E"/>
+<rect x="25" y="11" width="2" height="1" fill="#1E1E1E"/><rect x="29" y="11" width="1" height="1" fill="#1E1E1E"/>
+<rect x="25" y="25" width="2" height="1" fill="#1E1E1E"/><rect x="29" y="25" width="1" height="1" fill="#1E1E1E"/>
+<rect x="25" y="29" width="2" height="1" fill="#1E1E1E"/><rect x="29" y="29" width="2" height="1" fill="#1E1E1E"/>
+</svg>
+          <div class="qr-hover"><span style="font-size:20px">&#128242;</span><span class="qr-hover-t">Tap to scan</span></div>
         </div>
-        <div class="qr-corner tl"></div><div class="qr-corner tr"></div>
-        <div class="qr-corner bl"></div><div class="qr-corner br"></div>
+        <div class="qr-c tl"></div><div class="qr-c tr"></div>
+        <div class="qr-c bl"></div><div class="qr-c br"></div>
       </div>
       <div class="fy-cta">Scan with your phone camera</div>
       <div class="fy-url">clinical.healthbridge.co.za/register</div>
     </div>
     <div class="fy-foot">
-      <svg width="13" height="13" viewBox="0 0 26 26" fill="none"><circle cx="13" cy="13" r="12" stroke="#F7941D" stroke-width="1.8"/><circle cx="13" cy="13" r="6.5" fill="#F7941D"/><rect x="10.5" y="7" width="5" height="11" rx="2.75" fill="#1E1E1E"/></svg>
-      <div class="fy-foot-l">healthbridge</div><div class="fy-foot-s">good business. best practice.</div>
+      <svg width="12" height="12" viewBox="0 0 26 26" fill="none"><circle cx="13" cy="13" r="12" stroke="#F7941D" stroke-width="1.8"/><circle cx="13" cy="13" r="6.5" fill="#F7941D"/><rect x="10.5" y="7" width="5" height="11" rx="2.75" fill="#1E1E1E"/></svg>
+      <div class="fy-foot-l">healthbridge</div>
+      <div class="fy-foot-s">good business. best practice.</div>
     </div>
   </div>
-  <div class="src-badges">
-    <div class="sbadge active" data-src="conf">Conference</div>
-    <div class="sbadge" data-src="social">Social media</div>
-    <div class="sbadge" data-src="sales">Sales card</div>
-    <div class="sbadge" data-src="email">Email</div>
+  <div class="tap-cue" id="tap-cue">
+    <span class="tap-a">&#128070;</span>
+    <span class="tap-t">Tap the QR code to simulate scanning</span>
   </div>
-  <div class="tap-cue" id="tap-cue"><span class="tap-a">👆</span><span class="tap-t">Tap the QR code to simulate scanning</span></div>
 </div>
 
-<!-- SCENE 2: CAMERA -->
-<div id="s-cam" class="scene off">
-  <div class="cam-world"><div class="cw-i cw1"></div><div class="cw-i cw2"></div><div class="cw-i cw3"></div><div class="cw-i cw4"></div></div>
+<!-- ══════════════════════════
+     SCENE 2 — CAMERA
+══════════════════════════ -->
+<div id="s-cam" class="scene">
+  <div class="cam-world"><div class="cw cw1"></div><div class="cw cw2"></div><div class="cw cw3"></div><div class="cw cw4"></div></div>
   <div class="cam-bg"></div>
   <div class="cam-top">
-    <div class="cam-btn" id="cam-close">✕</div>
+    <div class="cam-btn" id="cam-close">&#10005;</div>
     <div class="cam-lbl">Scan QR Code</div>
-    <div class="cam-btn">⚡</div>
+    <div class="cam-btn">&#9889;</div>
   </div>
   <div class="vf-shadow"></div>
   <div class="vf-box" id="vf-box">
-    <div class="vf-c tl"></div><div class="vf-c tr"></div><div class="vf-c bl"></div><div class="vf-c br"></div>
-    <div class="vf-qr">
-      <svg width="188" height="188" viewBox="0 0 41 41" xmlns="http://www.w3.org/2000/svg" shape-rendering="crispEdges">
-        <rect x="1" y="1" width="7" height="7" fill="#1E1E1E"/><rect x="2" y="2" width="5" height="5" fill="white"/><rect x="3" y="3" width="3" height="3" fill="#1E1E1E"/>
-        <rect x="33" y="1" width="7" height="7" fill="#1E1E1E"/><rect x="34" y="2" width="5" height="5" fill="white"/><rect x="35" y="3" width="3" height="3" fill="#1E1E1E"/>
-        <rect x="1" y="33" width="7" height="7" fill="#1E1E1E"/><rect x="2" y="34" width="5" height="5" fill="white"/><rect x="3" y="35" width="3" height="3" fill="#1E1E1E"/>
-        <rect x="17" y="17" width="7" height="7" rx="1.5" fill="#1E1E1E"/>
-        <circle cx="20.5" cy="20.5" r="3" fill="#F7941D"/>
-        <rect x="9" y="1" width="1" height="1" fill="#1E1E1E"/><rect x="13" y="1" width="2" height="1" fill="#1E1E1E"/><rect x="21" y="1" width="2" height="1" fill="#1E1E1E"/>
-      </svg>
-    </div>
+    <div class="vf-c tl"></div><div class="vf-c tr"></div>
+    <div class="vf-c bl"></div><div class="vf-c br"></div>
+    <div class="vf-qr"><svg width="188" height="188" viewBox="0 0 41 41" xmlns="http://www.w3.org/2000/svg" shape-rendering="crispEdges">
+<rect x="1" y="1" width="7" height="7" fill="#1E1E1E"/><rect x="2" y="2" width="5" height="5" fill="white"/><rect x="3" y="3" width="3" height="3" fill="#1E1E1E"/>
+<rect x="33" y="1" width="7" height="7" fill="#1E1E1E"/><rect x="34" y="2" width="5" height="5" fill="white"/><rect x="35" y="3" width="3" height="3" fill="#1E1E1E"/>
+<rect x="1" y="33" width="7" height="7" fill="#1E1E1E"/><rect x="2" y="34" width="5" height="5" fill="white"/><rect x="3" y="35" width="3" height="3" fill="#1E1E1E"/>
+<rect x="17" y="17" width="7" height="7" rx="1.5" fill="#1E1E1E"/>
+<circle cx="20.5" cy="20.5" r="2.8" fill="#F7941D"/>
+<rect x="9" y="1" width="1" height="1" fill="#1E1E1E"/><rect x="11" y="1" width="1" height="1" fill="#1E1E1E"/><rect x="13" y="1" width="2" height="1" fill="#1E1E1E"/>
+<rect x="17" y="1" width="1" height="1" fill="#1E1E1E"/><rect x="21" y="1" width="2" height="1" fill="#1E1E1E"/>
+<rect x="9" y="3" width="2" height="1" fill="#1E1E1E"/><rect x="13" y="3" width="1" height="1" fill="#1E1E1E"/><rect x="20" y="3" width="3" height="1" fill="#1E1E1E"/>
+<rect x="9" y="5" width="1" height="1" fill="#1E1E1E"/><rect x="11" y="5" width="2" height="1" fill="#1E1E1E"/><rect x="15" y="5" width="2" height="1" fill="#1E1E1E"/>
+<rect x="1" y="9" width="1" height="1" fill="#1E1E1E"/><rect x="3" y="9" width="1" height="1" fill="#1E1E1E"/><rect x="5" y="9" width="1" height="1" fill="#1E1E1E"/>
+<rect x="9" y="9" width="1" height="1" fill="#1E1E1E"/><rect x="13" y="9" width="2" height="1" fill="#1E1E1E"/>
+<rect x="9" y="11" width="2" height="1" fill="#1E1E1E"/><rect x="25" y="9" width="2" height="1" fill="#1E1E1E"/>
+<rect x="9" y="25" width="1" height="1" fill="#1E1E1E"/><rect x="11" y="25" width="2" height="1" fill="#1E1E1E"/>
+<rect x="9" y="27" width="2" height="1" fill="#1E1E1E"/><rect x="25" y="27" width="1" height="1" fill="#1E1E1E"/>
+<rect x="9" y="33" width="1" height="1" fill="#1E1E1E"/><rect x="25" y="33" width="2" height="1" fill="#1E1E1E"/>
+<rect x="25" y="3" width="2" height="1" fill="#1E1E1E"/><rect x="29" y="9" width="2" height="1" fill="#1E1E1E"/>
+<rect x="25" y="11" width="2" height="1" fill="#1E1E1E"/><rect x="29" y="11" width="1" height="1" fill="#1E1E1E"/>
+<rect x="25" y="25" width="2" height="1" fill="#1E1E1E"/><rect x="29" y="25" width="1" height="1" fill="#1E1E1E"/>
+<rect x="25" y="29" width="2" height="1" fill="#1E1E1E"/><rect x="29" y="29" width="2" height="1" fill="#1E1E1E"/>
+</svg></div>
     <div class="vf-scanl"></div>
   </div>
-  <div class="cam-hint-wrap"><div class="cam-hint-t">Point camera at QR code</div></div>
+  <div class="cam-hint">Point camera at QR code</div>
   <div class="cam-bottom">
     <div class="shutter" id="shutter"><div class="shutter-in"></div></div>
   </div>
   <div class="scan-flash" id="scan-flash"></div>
-  <div class="scan-tick" id="scan-tick"><div class="tick-ring">✓</div></div>
+  <div class="scan-tick" id="scan-tick"><div class="tick-ring">&#10003;</div></div>
 </div>
 
-<!-- SCENE 3: VALIDATION -->
-<div id="s-val" class="scene off">
+<!-- ══════════════════════════
+     SCENE 3 — TOKEN VALIDATION
+══════════════════════════ -->
+<div id="s-val" class="scene">
   <div class="val-phone">
     <div class="vp-bar"></div>
     <div class="vp-hdr">
-      <svg width="17" height="17" viewBox="0 0 26 26" fill="none"><circle cx="13" cy="13" r="12" stroke="#F7941D" stroke-width="1.8"/><circle cx="13" cy="13" r="6.5" fill="#F7941D"/><rect x="10.5" y="7" width="5" height="11" rx="2.75" fill="#1E1E1E"/></svg>
+      <svg width="16" height="16" viewBox="0 0 26 26" fill="none"><circle cx="13" cy="13" r="12" stroke="#F7941D" stroke-width="1.8"/><circle cx="13" cy="13" r="6.5" fill="#F7941D"/><rect x="10.5" y="7" width="5" height="11" rx="2.75" fill="#1E1E1E"/></svg>
       <div><div class="vp-lt">healthbridge</div><div class="vp-ls">good business. best practice.</div></div>
-      <div class="vp-b">Free Sign-Up</div>
+      <div class="vp-badge">Free Sign-Up</div>
     </div>
     <div class="vp-body">
-      <div class="val-icon">
-        <svg width="30" height="30" viewBox="0 0 26 26" fill="none"><circle cx="13" cy="13" r="12" stroke="#F7941D" stroke-width="1.8"/><circle cx="13" cy="13" r="6.5" fill="#F7941D"/><rect x="10.5" y="7" width="5" height="11" rx="2.75" fill="#1E1E1E"/></svg>
-      </div>
+      <div class="val-icon"><svg width="28" height="28" viewBox="0 0 26 26" fill="none"><circle cx="13" cy="13" r="12" stroke="#F7941D" stroke-width="1.8"/><circle cx="13" cy="13" r="6.5" fill="#F7941D"/><rect x="10.5" y="7" width="5" height="11" rx="2.75" fill="#1E1E1E"/></svg></div>
       <div class="val-title">Verifying your link</div>
       <div class="val-sub" id="val-sub">Checking your invitation...</div>
       <div class="val-prog-wrap"><div class="val-prog" id="val-prog"></div></div>
@@ -456,12 +574,14 @@ html,body{height:100%;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sa
       </div>
       <div class="val-status" id="val-status"></div>
     </div>
-    <div class="vp-foot">POPIA Compliant · Secured by Healthbridge · tradebridge (Pty) Ltd</div>
+    <div class="vp-foot">POPIA Compliant &middot; Secured by Healthbridge</div>
   </div>
 </div>
 
-<!-- SCENE 4: ENTER BRIDGE -->
-<div id="s-enter" class="scene off">
+<!-- ══════════════════════════
+     SCENE 4 — ENTER BRIDGE
+══════════════════════════ -->
+<div id="s-enter" class="scene">
   <div style="text-align:center">
     <div style="width:60px;height:60px;border-radius:18px;background:#1E1E1E;display:flex;align-items:center;justify-content:center;margin:0 auto 1rem">
       <svg width="34" height="34" viewBox="0 0 26 26" fill="none"><circle cx="13" cy="13" r="12" stroke="#F7941D" stroke-width="1.8"/><circle cx="13" cy="13" r="6.5" fill="#F7941D"/><rect x="10.5" y="7" width="5" height="11" rx="2.75" fill="#1E1E1E"/></svg>
@@ -476,100 +596,133 @@ html,body{height:100%;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sa
   </div>
 </div>
 
-<!-- SCENE 5: APP SHELL -->
-<div id="s-app" class="scene off" style="flex-direction:column">
+<!-- ══════════════════════════
+     SCENE 5 — APP
+══════════════════════════ -->
+<div id="s-app" class="scene" style="flex-direction:column">
+
+  <!-- PRESENTER BAR -->
+  <div class="pbar">
+    <span class="pbar-label">Demo route:</span>
+    <div class="pbar-routes">
+      <div class="pr pr-n sel" data-prt="new"><div class="pr-dot prd-n"></div>Route 1 &mdash; New client</div>
+      <div class="pr pr-h" data-prt="hb"><div class="pr-dot prd-h"></div>Route 2 &mdash; Existing HB</div>
+      <div class="pr pr-c" data-prt="clin"><div class="pr-dot prd-c"></div>Route 3 &mdash; Already Clinical</div>
+    </div>
+    <div class="pbar-sep"></div>
+    <div class="pbar-hint" id="pbar-hint">Tap a route above to switch scenario at any time</div>
+    <button class="pbar-restart" id="pbar-restart">&#8635; Restart</button>
+  </div>
+
+  <!-- APP HEADER -->
   <div class="app-hdr">
-    <svg width="26" height="26" viewBox="0 0 26 26" fill="none"><circle cx="13" cy="13" r="12" stroke="#F7941D" stroke-width="1.8"/><circle cx="13" cy="13" r="6.5" fill="#F7941D"/><rect x="10.5" y="7" width="5" height="11" rx="2.75" fill="#1E1E1E"/></svg>
+    <svg width="24" height="24" viewBox="0 0 26 26" fill="none"><circle cx="13" cy="13" r="12" stroke="#F7941D" stroke-width="1.8"/><circle cx="13" cy="13" r="6.5" fill="#F7941D"/><rect x="10.5" y="7" width="5" height="11" rx="2.75" fill="#1E1E1E"/></svg>
     <div><div class="logo-t">healthbridge</div><div class="logo-s">good business. best practice.</div></div>
     <div class="hdr-sep"></div>
-    <div class="hdr-title">Provider Self-Registration — System Flow</div>
-    <div class="route-pill rp-h" id="route-pill"></div>
-    <button id="reset-btn" onclick="stepIdx=0;simRoute='new';showScene('s-conf');document.querySelectorAll('.sbadge').forEach(function(b){b.classList.toggle('active',b.dataset.src==='conf')});curSrc='conf';document.getElementById('src-event').textContent=SRCS['conf'].event;document.getElementById('src-loc').textContent='&#128205; '+SRCS['conf'].loc;" style="display:flex;align-items:center;gap:5px;padding:5px 12px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.15);border-radius:7px;color:rgba(255,255,255,.6);font-size:11px;font-weight:600;cursor:pointer;transition:all .2s;white-space:nowrap;font-family:inherit">
-      <span style="font-size:13px">&#8635;</span> Restart demo
-    </button>
+    <div class="hdr-title">Provider Self-Registration &mdash; System Flow</div>
   </div>
+
+  <!-- STEP NAV -->
   <div class="step-nav" id="step-nav"></div>
+
+  <!-- MAIN SPLIT -->
   <div class="app-main">
     <div class="col-client">
       <div class="col-lbl"><div class="col-lbl-dot cld-o"></div>What the provider sees</div>
       <div class="phone">
         <div class="ph-bar"></div>
         <div class="ph-hdr">
-          <svg width="18" height="18" viewBox="0 0 26 26" fill="none"><circle cx="13" cy="13" r="12" stroke="#F7941D" stroke-width="1.8"/><circle cx="13" cy="13" r="6.5" fill="#F7941D"/><rect x="10.5" y="7" width="5" height="11" rx="2.75" fill="#1E1E1E"/></svg>
+          <svg width="17" height="17" viewBox="0 0 26 26" fill="none"><circle cx="13" cy="13" r="12" stroke="#F7941D" stroke-width="1.8"/><circle cx="13" cy="13" r="6.5" fill="#F7941D"/><rect x="10.5" y="7" width="5" height="11" rx="2.75" fill="#1E1E1E"/></svg>
           <div><div class="ph-lt">healthbridge</div><div class="ph-ls">good business. best practice.</div></div>
           <div class="ph-badge">Free Sign-Up</div>
         </div>
         <div class="ph-prog"><div class="ph-pf" id="ph-prog"></div></div>
         <div class="ph-dots" id="ph-dots"></div>
         <div class="ph-body" id="ph-screen"></div>
-        <div class="ph-foot">POPIA Compliant · tradebridge (Pty) Ltd</div>
+        <div class="ph-foot">POPIA Compliant &middot; tradebridge (Pty) Ltd</div>
       </div>
     </div>
     <div class="col-int">
-      <div class="col-lbl"><div class="col-lbl-dot cld-b"></div>What's happening behind the scenes</div>
+      <div class="col-lbl"><div class="col-lbl-dot cld-b"></div>What&rsquo;s happening behind the scenes</div>
       <div id="int-panel"></div>
     </div>
   </div>
+
+  <!-- NAV BAR -->
   <div class="nav-bar">
     <button class="nav-prev" id="nav-prev">&#8592; Previous</button>
     <div class="nav-ctr" id="nav-ctr"></div>
     <button class="nav-next" id="nav-next">Next &#8594;</button>
   </div>
+
 </div>
 
-<script>
-// ══════════════════════════════════════════════════════
-//  ALL JS — written in pure ES5-compatible style
-//  No nested template literals, no heredoc issues
-// ══════════════════════════════════════════════════════
+<style>
+@keyframes edot{0%,100%{background:#DDD;transform:scale(1)}50%{background:var(--o);transform:scale(1.3)}}
+</style>
 
+<script>
 var SRCS = {
-  conf:   { event:'MedAfrica Conference 2026',    loc:'Sandton Convention Centre · Booth 14B', token:'HBC-2026-CONF-A7X9' },
-  social: { event:'Social Media Campaign',         loc:'Instagram / LinkedIn / Facebook',       token:'HBC-2026-SOC-B3K2'  },
-  sales:  { event:'Healthbridge Sales Team',       loc:'Business card handover',                token:'HBC-2026-SALES-C9M5'},
-  email:  { event:'Email Campaign — March 2026',   loc:'Provider newsletter',                   token:'HBC-2026-EMAIL-D4P8'}
+  conf:   { event:'MedAfrica Conference 2026',    loc:'Sandton Convention Centre', token:'HBC-2026-CONF-A7X9' },
+  social: { event:'Social Media Campaign',         loc:'Instagram / LinkedIn',      token:'HBC-2026-SOC-B3K2'  },
+  sales:  { event:'Healthbridge Sales Team',       loc:'Business card',             token:'HBC-2026-SALES-C9M5'},
+  email:  { event:'Email Campaign',                loc:'Provider newsletter',        token:'HBC-2026-EMAIL-D4P8'}
 };
+var ROUTES = {
+  new:  { label:'Route 1 — New client',           hint:'Full registration flow — no existing HB account found' },
+  hb:   { label:'Route 2 — Existing HB client',   hint:'Reduced flow — profile pre-filled from existing HB records' },
+  clin: { label:'Route 3 — Already on Clinical',  hint:'Registration blocked — active Clinical account found' }
+};
+
 var curSrc = 'conf';
-var simRoute = 'new'; // 'new' | 'hb' | 'clin'
+var simRoute = 'new';
 var stepIdx = 0;
 
-// ── SOURCE SWITCHER ──────────────────────────────────
-document.querySelectorAll('.sbadge').forEach(function(b) {
-  b.addEventListener('click', function() {
-    curSrc = b.dataset.src;
-    document.querySelectorAll('.sbadge').forEach(function(x){ x.classList.toggle('active', x===b); });
-    document.getElementById('src-event').textContent = SRCS[curSrc].event;
-    document.getElementById('src-loc').textContent = '📍 ' + SRCS[curSrc].loc;
-  });
-});
-
 // ── SCENE MANAGEMENT ─────────────────────────────────
-function showScene(id) {
-  ['s-conf','s-cam','s-val','s-enter','s-app'].forEach(function(s){
-    var el = document.getElementById(s);
-    el.classList.toggle('on', s===id);
-    el.classList.toggle('off', s!==id);
+function show(id) {
+  ['s-setup','s-conf','s-cam','s-val','s-enter','s-app'].forEach(function(s){
+    document.getElementById(s).classList.toggle('active', s===id);
   });
 }
+
+// ── SETUP SCREEN ─────────────────────────────────────
+document.querySelectorAll('.route-opt').forEach(function(opt) {
+  opt.addEventListener('click', function() {
+    document.querySelectorAll('.route-opt').forEach(function(o){ o.className='route-opt'; });
+    simRoute = opt.dataset.route;
+    opt.classList.add('sel-'+simRoute);
+  });
+});
+document.querySelectorAll('.src-btn').forEach(function(btn) {
+  btn.addEventListener('click', function() {
+    document.querySelectorAll('.src-btn').forEach(function(b){ b.classList.remove('sel'); });
+    btn.classList.add('sel');
+    curSrc = btn.dataset.src;
+  });
+});
+document.getElementById('start-demo-btn').addEventListener('click', function() {
+  document.getElementById('conf-event-lbl').textContent = SRCS[curSrc].event;
+  stepIdx = 0;
+  show('s-conf');
+});
 
 // ── QR + CAMERA ──────────────────────────────────────
-document.getElementById('qr-wrap').addEventListener('click', startScan);
+document.getElementById('qr-tap').addEventListener('click', startScan);
 document.getElementById('tap-cue').addEventListener('click', startScan);
-document.getElementById('cam-close').addEventListener('click', function(){
-  showScene('s-conf');
-});
+document.getElementById('cam-close').addEventListener('click', function(){ show('s-conf'); });
 document.getElementById('shutter').addEventListener('click', triggerScan);
 
+var scanTimer = null;
 function startScan() {
-  showScene('s-cam');
-  setTimeout(triggerScan, 2200);
+  show('s-cam');
+  scanTimer = setTimeout(triggerScan, 2200);
 }
 function triggerScan() {
+  if(scanTimer){ clearTimeout(scanTimer); scanTimer=null; }
   var flash = document.getElementById('scan-flash');
   flash.classList.add('on');
   document.querySelectorAll('#vf-box .vf-c').forEach(function(c){
     c.style.borderColor = '#F7941D';
-    c.style.transition = 'border-color .2s';
   });
   setTimeout(function(){
     flash.classList.remove('on');
@@ -577,637 +730,555 @@ function triggerScan() {
     tick.classList.add('on');
     setTimeout(function(){
       tick.classList.remove('on');
-      document.querySelectorAll('#vf-box .vf-c').forEach(function(c){ c.style.borderColor = '#fff'; });
+      document.querySelectorAll('#vf-box .vf-c').forEach(function(c){ c.style.borderColor='#fff'; });
       startValidation();
     }, 700);
-  }, 180);
+  }, 350);
 }
 
 // ── TOKEN VALIDATION ─────────────────────────────────
 function startValidation() {
-  showScene('s-val');
+  show('s-val');
   var checks = document.querySelectorAll('.vchk');
-  checks.forEach(function(c, i){
+  checks.forEach(function(c,i){
     setTimeout(function(){
       c.classList.add('show');
       c.querySelector('.vci').innerHTML = '<div class="vci-spin"></div>';
     }, 200 + i*80);
   });
   var msgs = [
-    'QR code signature verified...',
-    'Token valid — ' + SRCS[curSrc].event + '...',
+    'QR signature verified...',
+    'Token valid — '+SRCS[curSrc].event+'...',
     '12 of 50 sign-ups used — available...',
-    'Device verified — 3 attempts available...'
+    'Device verified — 3 attempts remaining...'
   ];
   var durs = [750, 650, 550, 500];
   var delay = 350, total = 0, prog = 0;
   durs.forEach(function(dur, i){
-    (function(idx, offset, d){
+    var t1 = delay + total;
+    var t2 = t1 + dur - 100;
+    (function(idx,t1,t2){
       setTimeout(function(){
-        var sub = document.getElementById('val-sub');
-        var pbar = document.getElementById('val-prog');
+        var sub=document.getElementById('val-sub');
+        var pb=document.getElementById('val-prog');
         if(sub) sub.textContent = msgs[idx];
         prog += 25;
-        if(pbar) pbar.style.width = Math.min(prog,95) + '%';
-      }, offset);
+        if(pb) pb.style.width = Math.min(prog,95)+'%';
+      }, t1);
       setTimeout(function(){
-        var el = document.getElementById('vc-'+idx);
-        var ico = document.getElementById('vci-'+idx);
+        var el=document.getElementById('vc-'+idx);
+        var ico=document.getElementById('vci-'+idx);
         if(el) el.classList.add('pass');
         if(ico){ ico.className='vci vci-pass'; ico.textContent='✓'; }
-      }, offset + d - 100);
-    })(i, delay+total, dur);
+      }, t2);
+    })(i, t1, t2);
     total += dur;
   });
   var done = delay + total + 200;
   setTimeout(function(){
-    var pbar = document.getElementById('val-prog');
-    var sub = document.getElementById('val-sub');
-    var st = document.getElementById('val-status');
-    if(pbar) pbar.style.width = '100%';
-    if(sub) sub.textContent = 'All checks passed — opening your registration form';
-    if(st) st.textContent = '\u2713 ' + SRCS[curSrc].token;
+    var pb=document.getElementById('val-prog');
+    var sub=document.getElementById('val-sub');
+    var st=document.getElementById('val-status');
+    if(pb) pb.style.width='100%';
+    if(sub) sub.textContent='All checks passed — opening your registration form';
+    if(st) st.textContent='✓ '+SRCS[curSrc].token;
   }, done);
-  setTimeout(function(){ showScene('s-enter'); }, done + 700);
+  setTimeout(function(){ show('s-enter'); }, done+700);
   setTimeout(function(){
-    showScene('s-app');
+    show('s-app');
+    stepIdx=0;
+    syncPresenterBar();
     appRender();
-  }, done + 1500);
+  }, done+1500);
 }
 
-// ══════════════════════════════════════════════════════
-//  APP — unified flow, HB check happens AFTER DIS
-// ══════════════════════════════════════════════════════
+// ── PRESENTER BAR ─────────────────────────────────────
+function syncPresenterBar() {
+  document.querySelectorAll('.pr').forEach(function(pr){
+    pr.classList.toggle('sel', pr.dataset.prt===simRoute);
+  });
+  var hint = document.getElementById('pbar-hint');
+  if(hint) hint.textContent = ROUTES[simRoute] ? ROUTES[simRoute].hint : '';
+}
+document.querySelectorAll('.pr').forEach(function(pr){
+  pr.addEventListener('click', function(){
+    simRoute = pr.dataset.prt;
+    // Jump back to id-entry so the route change makes sense in context
+    if(stepIdx > 1) stepIdx = 1;
+    syncPresenterBar();
+    appRender();
+  });
+});
+document.getElementById('pbar-restart').addEventListener('click', function(){
+  stepIdx=0; simRoute='new'; curSrc='conf';
+  // Reset validation UI
+  document.querySelectorAll('.vchk').forEach(function(c){
+    c.classList.remove('show','pass');
+    c.querySelector('.vci').className='vci';
+    c.querySelector('.vci').innerHTML='';
+  });
+  var pb=document.getElementById('val-prog'); if(pb) pb.style.width='0%';
+  show('s-setup');
+});
 
+// ── APP ───────────────────────────────────────────────
 var STEPS = [
-  { id:'qr-ok',    nav:'Welcome',         prog:0,   lbl:'Getting started' },
-  { id:'id-entry', nav:'ID Entry',        prog:12,  lbl:'Step 1 of 7' },
-  { id:'dis-call', nav:'DHA Verify',      prog:24,  lbl:'Step 2 of 7' },
-  { id:'dis-res',  nav:'Identity Result', prog:36,  lbl:'Step 3 of 7' },
-  { id:'hb-check', nav:'HB DB Check',     prog:50,  lbl:'Step 4 of 7' },
-  { id:'route-out',nav:'Route Decision',  prog:64,  lbl:'Step 5 of 7' },
-  { id:'continue', nav:'Continue',        prog:80,  lbl:'Step 6 of 7' },
-  { id:'done',     nav:'Complete',        prog:100, lbl:'Complete' }
+  { id:'welcome',   nav:'Welcome',        prog:0   },
+  { id:'id-entry',  nav:'ID Entry',       prog:13  },
+  { id:'dis-call',  nav:'DHA Verify',     prog:26  },
+  { id:'dis-res',   nav:'Identity Result',prog:39  },
+  { id:'hb-check',  nav:'HB DB Check',   prog:54  },
+  { id:'route-out', nav:'Route Decision', prog:68  },
+  { id:'continue',  nav:'Continue',       prog:82  },
+  { id:'done',      nav:'Complete',       prog:100 }
 ];
 
-// ── HTML BUILDING UTILITIES (no nested template literals) ──
-function el(tag, attrs, inner) {
-  var a = Object.keys(attrs||{}).map(function(k){ return k+'="'+attrs[k]+'"'; }).join(' ');
-  return '<'+tag+(a?' '+a:'')+'>'+inner+'</'+tag+'>';
+// ── HTML HELPERS ──────────────────────────────────────
+function div(c,h){ return '<div class="'+c+'">'+h+'</div>'; }
+function span(c,h){ return '<span class="'+c+'">'+h+'</span>'; }
+function el(t,a,h){
+  var at=Object.keys(a||{}).map(function(k){return k+'="'+a[k]+'"';}).join(' ');
+  return '<'+t+(at?' '+at:'')+'>'+h+'</'+t+'>';
 }
-function div(cls, inner)  { return '<div class="'+cls+'">'+inner+'</div>'; }
-function span(cls, inner) { return '<span class="'+cls+'">'+inner+'</span>'; }
-
-function pbn(type, icon, html) {
-  return div('pbn pbn-'+type, div('pbn-ic',icon)+div('',html));
+function pbn(type,icon,html){
+  return div('pbn pbn-'+type, span('pbn-ic',icon)+div('',html));
 }
-function fld(lbl, ph, val, req, hint) {
-  var mk = req ? span('preq','*') : span('popt','opt');
+function fld(lbl,ph,val,req,hint){
+  var mk = req ? span('preq','*') : '';
   var cls = val ? 'pfi ok' : 'pfi';
   return div('pf',
-    el('label',{},lbl+' '+mk) +
+    el('label',{},lbl+(mk?' '+mk:''))+
     el('input',{class:cls,value:val||'',placeholder:ph||''},'') +
-    (hint ? div('pfb', hint) : '')
+    (hint?div('pfb',hint):'')
   );
 }
-function sel(lbl, id, opts, val, req) {
-  var mk = req ? span('preq','*') : span('popt','opt');
-  var os = opts.map(function(o){ return el('option',o===val?{selected:''}:{},o); }).join('');
-  return div('pf', el('label',{},lbl+' '+mk) + el('select',{class:'psel'},os));
+function sel(lbl,opts,val,req){
+  var mk = req ? span('preq','*') : '';
+  var os = opts.map(function(o){return el('option',o===val?{selected:''}:{},o);}).join('');
+  return div('pf', el('label',{},lbl+(mk?' '+mk:''))+el('select',{class:'psel'},os));
 }
-function grid2(a, b) { return div('pg2', a+b); }
-function dtrow(l, v) { return div('dr', span('dl',l)+span('dv',v)); }
-function trow(l, v)  { return div('tbox-r', span('tbox-l',l)+span('tbox-v',v)); }
-function btnPrimary(label, cls) { return el('button',{class:'pbtn '+(cls||''), 'data-action':label},label); }
+function g2(a,b){ return div('pg2',a+b); }
+function dtr(l,v){ return div('dtr',span('dtl',l)+span('dtv',v)); }
+function kv(k,v){ return div('',span('ak',k)+': '+span('av2',v)); }
 
-function procStep(ico, icoC, title, desc, type, status, extraCls) {
-  var sc = status==='act' ? 'ps-st pss-act' : status==='done' ? 'ps-st pss-done' : status==='blk' ? 'ps-st pss-blk' : 'ps-st pss-wait';
-  var si = status==='act' ? '&#9679;' : status==='done' ? '&#10003;' : status==='blk' ? '&#10005;' : '&middot;';
-  var cls = 'ps' + (extraCls ? ' '+extraCls : '') + ' ' + (status==='act'?'act':status==='done'?'done':status==='blk'?'blk':'');
+function procStep(ico,icoC,title,desc,type,status,extra){
+  var sc = status==='act'?'ps-st pss-act':status==='done'?'ps-st pss-done':status==='blk'?'ps-st pss-blk':'ps-st pss-wait';
+  var si = status==='act'?'&#9679;':status==='done'?'&#10003;':status==='blk'?'&#10005;':'&middot;';
+  var cls = 'ps'+(extra?' '+extra:'')+(status==='act'?' act':status==='done'?' done':status==='blk'?' blk':'');
   return div(cls,
-    div('ps-ico psi-'+icoC, ico) +
-    div('ps-con',
-      div('ps-t2', title) +
-      div('ps-d', desc) +
-      span('ps-typ pty-'+type, type)
-    ) +
-    div(sc, si)
+    div('ps-ico psi-'+icoC,ico)+
+    div('ps-con',div('ps-t2',title)+div('ps-d',desc)+span('ps-typ pty-'+type,type))+
+    div(sc,si)
   );
 }
-
-function phaseHdr(dotCls, lbl, val, tagCls) {
+function phHdr(dot,lbl,val,tag){
   return div('ph-hdr2',
-    div('ph-pulse pp-'+dotCls, '') +
-    div('', div('ph-lbl', lbl)+div('ph-val', val)) +
-    div('ph-tag pht-'+tagCls, tagCls)
+    div('ph-pulse pp-'+dot,'')+
+    div('',div('ph-lbl',lbl)+div('ph-val',val))+
+    div('ph-tag pht-'+tag,tag)
   );
 }
-
-function apiCard(method, url, params, res, status) {
-  var stCls = status==='ok' ? 'api-st as-ok' : 'api-st as-pend';
-  var stLbl = status==='ok' ? '200 OK' : 'Calling...';
+function apiCard(m,u,params,res,status){
+  var st = status==='ok'?'api-st as-ok':'api-st as-pend';
+  var sl = status==='ok'?'200 OK':'Calling...';
   return div('api-card',
-    div('api-hdr', span('api-m',method)+' '+span('api-u',url)+span(stCls,stLbl)) +
+    div('api-hdr',span('api-m',m)+' '+span('api-u',u)+span(st,sl))+
     div('api-bdy',
-      div('api-req', div('api-ht','Request')+params) +
-      div('api-res', div('api-ht','Response')+res)
+      div('api-req',div('api-ht','Request')+params)+
+      div('api-res',div('api-ht','Response')+res)
     )
   );
 }
-
-function kv(k, v) { return div('', span('ak',k)+': '+span('av2',v)); }
-
-function decBlock(chosen) {
-  var opts = [
-    { cls:'do-n', dot:'dd-n', lbl:'No record found &rarr; Full registration (new client)' },
-    { cls:'do-h', dot:'dd-h', lbl:'Existing HB client &rarr; Pre-fill + reduced steps' },
-    { cls:'do-c', dot:'dd-c', lbl:'Active Clinical account &rarr; Block + redirect to sign-in' }
+function decBlock(chosen){
+  var opts=[
+    {cls:'do-n',dot:'dd-n',lbl:'No record → Full registration (new client)'},
+    {cls:'do-h',dot:'dd-h',lbl:'Existing HB client → Pre-fill + reduced steps'},
+    {cls:'do-c',dot:'dd-c',lbl:'Active Clinical account → Block + redirect'}
   ];
-  var routes = ['new','hb','clin'];
-  var optHtml = opts.map(function(o, i){
-    var isCh = routes[i]===chosen;
-    return div('dec-opt '+o.cls+(isCh?' chosen':''), div('dd '+o.dot,'')+o.lbl);
+  var rs=['new','hb','clin'];
+  var oh = opts.map(function(o,i){
+    return div('dec-opt '+o.cls+(rs[i]===chosen?' chosen':''),div('dd '+o.dot,'')+o.lbl);
   }).join('');
-  var resColor = chosen==='new'?'#166534':chosen==='hb'?'#1E40AF':'#991B1B';
-  var resText = chosen==='new'?'&#128994; New client &mdash; proceed to professional details':
-                chosen==='hb'?'&#128309; Existing HB client &mdash; pre-fill and continue':
-                '&#128308; Active Clinical account &mdash; block registration';
+  var rc=chosen==='new'?'#166534':chosen==='hb'?'#1E40AF':'#991B1B';
+  var rl=chosen==='new'?'&#128994; New client — proceed to professional details':
+         chosen==='hb'?'&#128309; Existing HB client — pre-fill and continue':
+         '&#128308; Active Clinical account — block registration';
   return div('dec-block',
-    div('dec-hdr','&#128256; Routing decision &mdash; based on HB database result') +
-    div('dec-opts', optHtml) +
-    '<div class="dec-result" style="color:'+resColor+'">'+resText+'</div>'
+    div('dec-hdr','&#128256; Routing decision — based on HB database result')+
+    div('dec-opts',oh)+
+    '<div class="dec-result" style="color:'+rc+'">'+rl+'</div>'
   );
 }
-
-function callout(type, icon, html) {
-  return div('co '+type, div('co-ic',icon)+div('',html));
+function co(type,icon,html){ return div('co '+type,div('co-ic',icon)+div('',html)); }
+function vci2(s,lbl,d){
+  var ic=s==='pass'?'&#10003;':s==='pend'?'&#9203;':'&#10005;';
+  return div('vci2 '+(s||''),span('vci2-ic',ic)+span('vci2-l',lbl)+span('vci2-d',d));
 }
-
-function vci2(status, lbl, detail) {
-  var ico = status==='pass'?'&#10003;':status==='pend'?'&#9203;':'&#10005;';
-  return div('vci2 '+(status||''), span('vci2-ic',ico)+span('vci2-l',lbl)+span('vci2-d',detail));
-}
-
-function auditLog(lines) {
-  var rows = lines.map(function(r){
-    return div('al',
-      span('al-tm', r[0]) + span('al-b alb-'+r[1], r[1].toUpperCase()) +
-      span('al-msg', r[2])
-    );
+function alog(lines){
+  var rows=lines.map(function(r){
+    return div('al',span('al-tm',r[0])+span('al-b alb-'+r[1],r[1].toUpperCase())+span('al-msg',r[2]));
   }).join('');
-  return div('audit', div('audit-t','&#128203; Audit trail')+rows);
+  return div('audit',div('audit-t','&#128203; Audit trail')+rows);
 }
 
-// ══════════════════════════════════════════════════════
-//  CLIENT SCREENS
-// ══════════════════════════════════════════════════════
-function clientScreen(id) {
-  var src = SRCS[curSrc];
-  if(id==='qr-ok') return (
-    '<div style="text-align:center;padding:.5rem 0 .75rem">' +
-    '<div style="width:56px;height:56px;background:linear-gradient(135deg,#F7941D,#e07d10);border-radius:16px;display:flex;align-items:center;justify-content:center;margin:0 auto .85rem;box-shadow:0 6px 20px rgba(247,148,29,.35)">' +
-    '<svg width="30" height="30" viewBox="0 0 26 26" fill="none"><circle cx="13" cy="13" r="12" stroke="#fff" stroke-width="1.8"/><circle cx="13" cy="13" r="6.5" fill="#fff"/><rect x="10.5" y="7" width="5" height="11" rx="2.75" fill="#F7941D"/></svg>' +
-    '</div>' +
-    '<div style="font-size:17px;font-weight:800;color:var(--dk);margin-bottom:.3rem;letter-spacing:-.3px">Welcome to Healthbridge Clinical</div>' +
-    '<div style="font-size:10px;color:var(--mid);line-height:1.5;margin-bottom:1rem">Free clinical EMR for South African providers.<br>DHA verified &middot; POPIA compliant &middot; No credit card.</div>' +
-    '</div>' +
-    '<div style="background:#F5F4F0;border-radius:8px;padding:.6rem .85rem;margin-bottom:.85rem;display:flex;align-items:center;gap:8px">' +
-    '<div style="width:28px;height:28px;border-radius:8px;background:var(--o);display:flex;align-items:center;justify-content:center;font-size:12px;flex-shrink:0">&#127919;</div>' +
-    '<div><div style="font-size:10px;font-weight:700;color:var(--dk)">'+src.event+'</div>' +
-    '<div style="font-size:9px;color:var(--mid)">You were invited via this campaign</div></div>' +
-    '</div>' +
-    '<div style="display:flex;flex-direction:column;gap:.5rem;margin-bottom:.85rem">' +
-    ['&#128100; Verify your identity via the Department of Home Affairs','&#127891; Confirm your HPCSA registration','&#127968; Capture your practice details','&#10003; Get instant access to your free account'].map(function(t,i){
-      var icon = t.split(' ')[0];
-      var text = t.slice(t.indexOf(' ')+1);
-      return '<div style="display:flex;align-items:center;gap:9px;padding:7px 10px;background:#fff;border:1px solid var(--border);border-radius:7px;font-size:10px;color:var(--mid)">' +
-        '<div style="width:22px;height:22px;border-radius:6px;background:var(--lt);display:flex;align-items:center;justify-content:center;font-size:11px;flex-shrink:0">'+icon+'</div>' +
-        '<span>'+text+'</span>' +
-        '</div>';
-    }).join('') +
-    '</div>' +
-    '<div style="font-size:9px;color:var(--fa);text-align:center;margin-bottom:.75rem">Takes about 5 minutes &middot; No credit card required</div>' +
-    el('button',{class:'pbtn','data-act':'next'},'Start my free registration &rarr;') +
-    '<div style="text-align:center;margin-top:.5rem;font-size:9px;color:var(--fa)">Already have an account? <span style="color:var(--o);cursor:pointer">Sign in</span></div>'
+// ══ CLIENT SCREENS ════════════════════════════════════
+function clientScreen(id){
+  var src=SRCS[curSrc];
+
+  if(id==='welcome') return (
+    '<div style="text-align:center;padding:.5rem 0 .6rem">'+
+    '<div style="width:54px;height:54px;background:linear-gradient(135deg,#F7941D,#e07d10);border-radius:15px;display:flex;align-items:center;justify-content:center;margin:0 auto .75rem;box-shadow:0 6px 20px rgba(247,148,29,.3)">'+
+    '<svg width="28" height="28" viewBox="0 0 26 26" fill="none"><circle cx="13" cy="13" r="12" stroke="#fff" stroke-width="1.8"/><circle cx="13" cy="13" r="6.5" fill="#fff"/><rect x="10.5" y="7" width="5" height="11" rx="2.75" fill="#F7941D"/></svg>'+
+    '</div>'+
+    '<div style="font-size:16px;font-weight:800;color:var(--dk);margin-bottom:.3rem;letter-spacing:-.3px">Welcome to Healthbridge Clinical</div>'+
+    '<div style="font-size:10px;color:var(--mid);line-height:1.5;margin-bottom:.85rem">Free clinical EMR for South African providers.<br>DHA verified &middot; POPIA compliant &middot; No credit card.</div>'+
+    '</div>'+
+    '<div style="background:#F5F4F0;border-radius:8px;padding:.55rem .85rem;margin-bottom:.75rem;display:flex;align-items:center;gap:8px">'+
+    '<div style="width:26px;height:26px;border-radius:7px;background:var(--o);display:flex;align-items:center;justify-content:center;font-size:11px;flex-shrink:0">&#127919;</div>'+
+    '<div><div style="font-size:10px;font-weight:700;color:var(--dk)">'+src.event+'</div>'+
+    '<div style="font-size:9px;color:var(--mid)">You were invited via this campaign</div></div>'+
+    '</div>'+
+    ['&#128100; Verify identity via Department of Home Affairs','&#127891; Confirm your HPCSA registration','&#127968; Capture your practice details','&#10003; Get instant access to your free account'].map(function(t,i){
+      var ic=t.split(' ')[0]; var tx=t.slice(t.indexOf(' ')+1);
+      return '<div style="display:flex;align-items:center;gap:8px;padding:6px 9px;background:#fff;border:1px solid var(--bd);border-radius:7px;font-size:10px;color:var(--mid);margin-bottom:4px">'+
+        '<div style="width:20px;height:20px;border-radius:5px;background:var(--lt);display:flex;align-items:center;justify-content:center;font-size:10px;flex-shrink:0">'+ic+'</div>'+
+        '<span>'+tx+'</span></div>';
+    }).join('')+
+    '<div style="font-size:9px;color:var(--fa);text-align:center;margin-bottom:.6rem;margin-top:.25rem">Takes about 5 minutes &middot; No credit card required</div>'+
+    el('button',{class:'pbtn','data-act':'next'},'Start my free registration &rarr;')+
+    '<div style="text-align:center;margin-top:.45rem;font-size:9px;color:var(--fa)">Already have an account? <span style="color:var(--o);cursor:pointer">Sign in</span></div>'
   );
 
   if(id==='id-entry') return (
-    div('ps-t','Identity verification') +
-    div('ps-s','Enter your SA ID number and cellphone. We\'ll verify your identity via the Department of Home Affairs first &mdash; then check our client records.') +
+    div('ps-t','Identity verification')+
+    div('ps-s','Enter your SA ID and cellphone. We verify your identity via the Department of Home Affairs first — then check our client records.')+
     div('id-tg',
-      div('id-tc sel', div('itc-ic','&#127464;&#127462;')+div('itc-l','SA ID Number')+div('itc-s','13-digit green ID')) +
-      div('id-tc', div('itc-ic','&#128196;')+div('itc-l','Passport')+div('itc-s','Foreign nationals'))
-    ) +
-    fld('SA ID Number','e.g. 9312340054084','9312340054084',true,'&#10003; Valid &middot; DOB: 14 Dec 1993 &middot; Male') +
-    fld('Cellphone Number','+27 82 123 4567','',true,null) +
+      div('id-tc sel',div('itc-ic','&#127464;&#127462;')+div('itc-l','SA ID Number')+div('itc-s','13-digit green ID'))+
+      div('id-tc',div('itc-ic','&#128196;')+div('itc-l','Passport')+div('itc-s','Foreign nationals'))
+    )+
+    fld('SA ID Number','e.g. 9312340054084','9312340054084',true,'&#10003; Valid &middot; DOB: 14 Dec 1993 &middot; Male')+
+    fld('Cellphone Number','+27 82 123 4567','',true,null)+
     el('button',{class:'pbtn','data-act':'next'},'Verify identity via DHA &rarr;')
   );
 
   if(id==='dis-call') return (
-    '<div style="padding:2.5rem 0;text-align:center">' +
-    div('spinner','') +
-    '<div style="font-size:11px;color:var(--mid)">Connecting to Department of Home Affairs...</div>' +
-    '<div style="font-size:9px;color:var(--fa);margin-top:4px">DIS verification via Healthbridge ID Service</div>' +
+    '<div style="padding:2.5rem 0;text-align:center">'+
+    div('spinner','')+
+    '<div style="font-size:11px;color:var(--mid)">Connecting to Department of Home Affairs...</div>'+
+    '<div style="font-size:9px;color:var(--fa);margin-top:4px">DIS verification via Healthbridge ID Service</div>'+
     '</div>'
   );
 
   if(id==='dis-res') return (
-    pbn('g','&#10003;','Identity verified via <strong>DHA Direct</strong>. Your details are confirmed.') +
-    '<div style="display:flex;align-items:center;gap:9px;margin-bottom:.65rem">' +
-    div('av','JM') +
-    '<div><div style="font-size:12px;font-weight:700">JOHANNES MOKOENA</div>' +
-    '<div style="font-size:9px;color:var(--mid)">DOB: 14 Dec 1993 &middot; Male</div>' +
-    div('vpil','&#10003; Active &middot; DHA Direct') +
-    '</div></div>' +
-    div('dtbl', dtrow('ID Number','9312340054084')+dtrow('Gender','Male')+dtrow('Marital status','Married')+dtrow('Cellphone','&#10003; Linked (Vodacom)')) +
-    grid2(fld('First name','','Johannes',true,null), fld('Surname','','Mokoena',true,null)) +
-    grid2(sel('Title','ttl',['Dr','Prof','Mr'],'Dr',true), sel('Language','lang',['English','Afrikaans','Zulu'],'English',false)) +
+    pbn('g','&#10003;','Identity verified via <strong>DHA Direct</strong>. Your details are confirmed.')+
+    '<div style="display:flex;align-items:center;gap:9px;margin-bottom:.65rem">'+
+    div('av','JM')+
+    '<div><div style="font-size:12px;font-weight:700">JOHANNES MOKOENA</div>'+
+    '<div style="font-size:9px;color:var(--mid)">DOB: 14 Dec 1993 &middot; Male</div>'+
+    div('vpil','&#10003; Active &middot; DHA Direct')+
+    '</div></div>'+
+    div('dtbl',dtr('ID Number','9312340054084')+dtr('Gender','Male')+dtr('Marital status','Married')+dtr('Cellphone','&#10003; Linked (Vodacom)'))+
+    g2(fld('First name','','Johannes',true,null),fld('Surname','','Mokoena',true,null))+
+    g2(sel('Title',['Dr','Prof','Mr'],'Dr',true),sel('Language',['English','Afrikaans','Zulu'],'English',false))+
     el('button',{class:'pbtn','data-act':'next'},'Confirm and continue &rarr;')
   );
 
   if(id==='hb-check') return (
-    '<div style="padding:2.5rem 0;text-align:center">' +
-    div('spinner','') +
-    '<div style="font-size:11px;color:var(--mid)">Checking Healthbridge client database...</div>' +
-    '<div style="font-size:9px;color:var(--fa);margin-top:4px">Matching your verified identity against existing records</div>' +
+    '<div style="padding:2.5rem 0;text-align:center">'+
+    div('spinner','')+
+    '<div style="font-size:11px;color:var(--mid)">Checking Healthbridge client database...</div>'+
+    '<div style="font-size:9px;color:var(--fa);margin-top:4px">Matching verified identity against existing records</div>'+
     '</div>'
   );
 
-  if(id==='route-out') {
+  if(id==='route-out'){
     if(simRoute==='clin') return (
-      '<div style="text-align:center;margin-bottom:.75rem">' +
-      '<div style="width:44px;height:44px;background:var(--rbg);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto .6rem;font-size:20px">&#127968;</div>' +
-      div('ps-t','You\'re already registered') +
-      div('ps-s','An active Healthbridge Clinical account is linked to your verified identity.') +
-      '</div>' +
-      '<div class="rc rc-c"><div class="rc-t" style="color:#991B1B">Dear Dr Johannes Mokoena,</div>' +
-      '<div class="rc-b">Your DHA-verified identity matches an active <strong>Healthbridge Clinical</strong> account at <strong>Mokoena Family Practice</strong>. No new registration is needed.</div></div>' +
-      div('dtbl', dtrow('Practice','Mokoena Family Practice')+dtrow('Account email','j.mokoena@mfp.co.za')+dtrow('HPCSA','MP0123456')) +
-      pbn('b','&#8505;&#65039;','Use <strong>Forgot Password</strong> on the sign-in page, or call <strong>0860 103 252</strong>.') +
-      el('button',{class:'pbtn pbtn-dk'},'Sign in to my account &rarr;') +
+      '<div style="text-align:center;margin-bottom:.75rem">'+
+      '<div style="width:44px;height:44px;background:var(--rbg);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto .55rem;font-size:20px">&#127968;</div>'+
+      div('ps-t',"You're already registered")+
+      div('ps-s','An active Healthbridge Clinical account is linked to your verified identity.')+
+      '</div>'+
+      '<div class="rc" style="background:var(--rbg);border:1px solid var(--rbd);border-radius:7px;padding:.7rem;margin-bottom:.6rem">'+
+      '<div style="font-size:12px;font-weight:700;color:#991B1B;margin-bottom:3px">Dear Dr Johannes Mokoena,</div>'+
+      '<div style="font-size:10px;color:var(--mid);line-height:1.5">Your DHA-verified identity matches an active <strong>Healthbridge Clinical</strong> account at <strong>Mokoena Family Practice</strong>.</div>'+
+      '</div>'+
+      div('dtbl',dtr('Practice','Mokoena Family Practice')+dtr('Email','j.mokoena@mfp.co.za')+dtr('HPCSA','MP0123456'))+
+      pbn('b','&#8505;&#65039;','Use <strong>Forgot Password</strong> on sign-in, or call <strong>0860 103 252</strong>.')+
+      el('button',{class:'pbtn pbtn-dk'},'Sign in to my account &rarr;')+
       el('button',{class:'pbtn pbtn-out','data-act':'restart'},'&#8592; Not you? Re-enter ID')
     );
     if(simRoute==='hb') return (
-      pbn('b','&#128309;','<strong>Existing Healthbridge client found.</strong> Your profile has been matched to your verified identity and pre-filled.') +
-      div('ps-t','Continuing your registration') +
-      div('ps-s','Your existing details have been loaded. Just complete the remaining steps to unlock Healthbridge Clinical.') +
+      pbn('b','&#128309;','<strong>Existing Healthbridge client found.</strong> Your profile has been pre-filled from our records.')+
+      div('ps-t','Continuing your registration')+
+      div('ps-s','Your existing Healthbridge details have been matched and loaded below.')+
       div('prof-box',
-        div('prof-hd','&#9989; Loaded from your Healthbridge profile') +
-        dtrow('Practice','Naidoo Medical Centre') +
-        dtrow('HPCSA','GP0876543') +
-        dtrow('Practice no.','2345678') +
-        dtrow('Province','KwaZulu-Natal')
-      ) +
+        div('prof-hd','&#9989; Loaded from your Healthbridge profile')+
+        dtr('Practice','Naidoo Medical Centre')+
+        dtr('HPCSA','GP0876543')+
+        dtr('Practice no.','2345678')+
+        dtr('Province','KwaZulu-Natal')
+      )+
       el('button',{class:'pbtn','data-act':'next'},'Continue with pre-filled details &rarr;')
     );
     return (
-      pbn('g','&#128994;','<strong>No existing Healthbridge account found.</strong> Welcome &mdash; let\'s complete your registration.') +
-      div('ps-t','New Healthbridge registration') +
-      div('ps-s','Your identity has been confirmed by DHA. Now we just need your professional and practice details.') +
+      pbn('g','&#128994;','<strong>No existing account found.</strong> Welcome — let’s complete your registration.')+
+      div('ps-t','New Healthbridge registration')+
+      div('ps-s','Your identity has been confirmed by DHA. Now we just need your professional and practice details.')+
       div('sf-wrap',
-        ['Enter professional details (HPCSA, discipline)','Capture practice information','Create account credentials','OTP verification &amp; review'].map(function(t,i){
-          return div('sf-step', div('sf-num',String(i+1))+span('',t));
+        ['Enter professional details (HPCSA, discipline)','Capture your practice information','Create account credentials &amp; OTP verification'].map(function(t,i){
+          return div('sf-step',div('sf-num',String(i+1))+span('',t));
         }).join('')
-      ) +
+      )+
       el('button',{class:'pbtn','data-act':'next'},'Continue to professional details &rarr;')
     );
   }
 
-  if(id==='continue') {
-    if(simRoute==='clin') return '<div style="text-align:center;padding:3rem 0;font-size:13px;color:var(--mid)">This route ends at the previous step &mdash; the provider is directed to sign in to their existing account.</div>';
+  if(id==='continue'){
+    if(simRoute==='clin') return '<div style="text-align:center;padding:3rem 0;font-size:13px;color:var(--mid)">Flow ends here — the provider is directed to sign in to their existing account.</div>';
     return (
-      (simRoute==='hb' ? pbn('b','&#128309;','Pre-filled from your Healthbridge profile. Verify and update if needed.') : '') +
-      div('ps-t', simRoute==='hb'?'Professional details (pre-filled)':'Professional details') +
-      div('ps-sec','Discipline *') +
-      div('dbtns',
-        ['General Practitioner','Specialist','Dentist','Physiotherapist','Psychologist','Pharmacist','Nurse Practitioner','Other'].map(function(d,i){
-          return el('button',{class:'dbtn'+(i===0?' sel':'')},d);
-        }).join('')
-      ) +
-      fld('HPCSA registration number','e.g. MP0123456', simRoute==='hb'?'GP0876543':'MP0123456', true, '2 letters + up to 7 digits') +
-      fld('BHF / PCNS practice number','e.g. 1512498', simRoute==='hb'?'2345678':'1512498', false, 'Required for medical aid billing') +
+      (simRoute==='hb'?pbn('b','&#128309;','Pre-filled from your Healthbridge profile. Verify and update if needed.'):'')+
+      div('ps-t',simRoute==='hb'?'Professional details (pre-filled)':'Professional details')+
+      div('ps-sec','Discipline *')+
+      div('dbtns',['General Practitioner','Specialist','Dentist','Physiotherapist','Psychologist','Pharmacist','Nurse Practitioner','Other'].map(function(d,i){
+        return el('button',{class:'dbtn'+(i===0?' sel':'')},d);
+      }).join(''))+
+      fld('HPCSA number','e.g. MP0123456',simRoute==='hb'?'GP0876543':'MP0123456',true,'2 letters + up to 7 digits')+
+      fld('Practice number','e.g. 1512498',simRoute==='hb'?'2345678':'1512498',false,'Required for medical aid billing')+
       el('button',{class:'pbtn','data-act':'next'},'Continue &rarr;')
     );
   }
 
-  if(id==='done') {
-    var isClin = simRoute==='clin';
+  if(id==='done'){
+    var isClin=simRoute==='clin';
     return (
-      '<div style="text-align:center">' +
-      div('succ-ico', isClin ? '&#128273;' : '&#10003;') +
-      div('ps-t', isClin?'Redirected to sign-in':'Account activated!') +
-      div('ps-s', isClin?'Provider directed to their existing account.':'Welcome to Healthbridge Clinical. Your free account is live.') +
-      '</div>' +
-      (isClin ? div('dtbl',
-        dtrow('Account found','Mokoena Family Practice') +
-        dtrow('Action','Redirected to sign-in page') +
-        dtrow('DIS calls made','2 (dhaIdVerification + cellphoneVerification)') +
-        dtrow('HB DB lookup','1 (post-DIS match)')
-      ) : div('dtbl',
-        dtrow('Provider','Dr Johannes Mokoena') +
-        dtrow('Discipline','General Practitioner') +
-        dtrow('Campaign', SRCS[curSrc].event) +
-        dtrow('Identity','&#10003; DHA Verified') +
-        dtrow('HB status', simRoute==='hb'?'Existing client &mdash; upgraded to Clinical':'New client registered')
-      )) +
-      (isClin ? '' : el('button',{class:'pbtn pbtn-dk'},'Open my dashboard &rarr;')) +
-      el('button',{class:'pbtn pbtn-out','data-act':'restart'},'&#8635; Restart demo')
+      '<div style="text-align:center">'+
+      div('succ-ico',isClin?'&#128273;':'&#10003;')+
+      div('ps-t',isClin?'Redirected to sign-in':'Account activated!')+
+      div('ps-s',isClin?'Provider directed to their existing account.':'Welcome to Healthbridge Clinical. Your free account is live.')+
+      '</div>'+
+      div('dtbl',
+        isClin?
+          dtr('Account','Mokoena Family Practice')+dtr('Action','Redirected to sign-in')+dtr('DIS calls made','2')+dtr('HB DB lookup','1 (post-DIS)'):
+          dtr('Provider','Dr Johannes Mokoena')+dtr('Campaign',SRCS[curSrc].event)+dtr('Identity','&#10003; DHA Verified')+dtr('Account type',simRoute==='hb'?'Existing HB — upgraded':'New registration')
+      )+
+      (isClin?'':el('button',{class:'pbtn pbtn-dk'},'Open my dashboard &rarr;'))+
+      el('button',{class:'pbtn pbtn-out','data-act':'restart-full'},'&#8635; Run another demo')
     );
   }
   return '';
 }
 
-// ══════════════════════════════════════════════════════
-//  INTERNAL PANELS
-// ══════════════════════════════════════════════════════
-function internalPanel(id) {
-  if(id==='qr-ok') return (
-    phaseHdr('i','Current phase','QR token validation &mdash; all checks passed','i') +
+// ══ INTERNAL PANELS ═══════════════════════════════════
+function internalPanel(id){
+  var src=SRCS[curSrc];
+
+  if(id==='welcome') return (
+    phHdr('i','Current phase','QR token validation — all checks passed','i')+
     div('proc-steps',
-      procStep('&#128274;','i','Token signature verified','HMAC check against server secret &mdash; confirms QR was issued by Healthbridge','i','done') +
-      procStep('&#128197;','i','Expiry validated','Token is within its valid date range','i','done') +
-      procStep('&#128202;','i','Usage cap checked','12 of 50 sign-ups used on this campaign QR','i','done') +
-      procStep('&#128242;','i','Device fingerprint checked','0 previous attempts from this device today &mdash; 3 remaining','i','done','act')
-    ) +
-    callout('co-sv','&#10003;','<strong>Sign-up form rendered.</strong> No database queries or API calls made yet. The anti-fraud gate operates entirely from the signed token &mdash; zero cost so far.') +
-    auditLog([
+      procStep('&#128274;','i','Token signature verified','HMAC check — confirms QR was issued by Healthbridge','i','done')+
+      procStep('&#128197;','i','Expiry validated','Token valid until 21 March 2026','i','done')+
+      procStep('&#128202;','i','Usage cap checked','12 of 50 sign-ups used on this campaign','i','done')+
+      procStep('&#128242;','i','Device fingerprint checked','0 previous attempts today — 3 remaining','i','done','act')
+    )+
+    co('co-sv','&#10003;','<strong>Form rendered.</strong> No database queries or API calls made yet. The anti-fraud gate operates entirely from the signed token — zero external cost.')+
+    alog([
       ['00:00.1','p','QR link opened in browser'],
-      ['00:00.2','s','Token extracted: <span class="al-h">'+SRCS[curSrc].token+'</span>'],
-      ['00:00.3','ok','HMAC valid &middot; Expiry OK &middot; Usage 12/50 &middot; Device 0/3']
+      ['00:00.2','s','Token: <span class="al-h">'+src.token+'</span>'],
+      ['00:00.3','ok','HMAC valid · Expiry OK · Usage 12/50 · Device 0/3']
     ])
   );
 
   if(id==='id-entry') return (
-    phaseHdr('p','Current phase','Provider entering ID &mdash; client-side validation only','p') +
-    div('db-spotlight',
-      div('db-spot-t','&#127918; Demo scenario selector') +
-      div('db-spot-s','Choose which type of provider this demo simulates. The provider never sees this &mdash; it controls the outcome of the HB database check at step 5.') +
-      div('db-steps',
-        [
-          { r:'new', dot:'al-g', lbl:'&#128994; No existing account &mdash; new client',   desc:'Will proceed through full registration' },
-          { r:'hb',  dot:'al-y', lbl:'&#128309; Existing HB client, no Clinical yet',      desc:'Profile will be pre-filled from HB records' },
-          { r:'clin',dot:'al-r', lbl:'&#128308; Already on Healthbridge Clinical',         desc:'Registration will be blocked at HB DB check' }
-        ].map(function(o){
-          var isSel = simRoute===o.r;
-          return '<button data-sim="'+o.r+'" style="display:flex;align-items:center;gap:8px;padding:6px 8px;border-radius:6px;background:'+(isSel?'rgba(255,255,255,.12)':'rgba(255,255,255,.04)')+';border:1px solid '+(isSel?'rgba(255,255,255,.25)':'rgba(255,255,255,.08)')+';cursor:pointer;width:100%;text-align:left;font-family:inherit">' +
-            '<div style="width:8px;height:8px;border-radius:50%;flex-shrink:0;background:'+(o.r==='new'?'#4ADE80':o.r==='hb'?'#FB923C':'#F87171')+'"></div>' +
-            '<div><div style="font-size:10px;font-weight:'+(isSel?'700':'500')+';color:'+(isSel?'#E2E8F0':'#94A3B8')+'">'+o.lbl+'</div>' +
-            '<div style="font-size:9px;color:#64748b">'+o.desc+'</div></div>' +
-            '</button>';
-        }).join('')
-      )
-    ) +
+    phHdr('p','Current phase','Provider entering ID — client-side validation only','p')+
     div('proc-steps',
-      procStep('&#9999;&#65039;','p','Provider enters SA ID + cellphone','Real-time format validation in browser &mdash; no server calls during input','p','act') +
-      procStep('&#127963;&#65039;','a','DIS: dhaIdVerification (next)','Will verify identity against DHA Direct database','a','wait','api') +
-      procStep('&#128242;','a','DIS: cellphoneVerification (next)','Will confirm cellphone is RICA-linked to this ID','a','wait','api') +
-      procStep('&#128451;','i','HB client DB lookup (later)','Runs only AFTER DIS verification is complete','i','wait')
-    ) +
-    callout('co-na','&#128683;','<strong>No API calls yet.</strong> The HB client database is not queried at this stage. Identity must be DHA-confirmed before we look up internal records.') +
+      procStep('&#9999;&#65039;','p','Provider enters SA ID + cellphone','Live format validation in browser — no server calls during input','p','act')+
+      procStep('&#127963;&#65039;','a','DIS: dhaIdVerification (next)','Will verify identity against DHA Direct database','a','wait','api')+
+      procStep('&#128242;','a','DIS: cellphoneVerification (next)','Confirms cellphone is RICA-linked to this ID','a','wait','api')+
+      procStep('&#128451;','i','HB client DB lookup (after DIS)','Only runs after identity is DHA-confirmed','i','wait')
+    )+
+    co('co-na','&#128683;','<strong>No API calls yet.</strong> The HB client database is not queried at this stage. Identity must be DHA-confirmed before we look up internal records.')+
     div('',
-      div('ps-sec','Client-side validation (DIS Spec v1.1)') +
-      vci2('pass','Exactly 13 numeric digits','VALID') +
-      vci2('pass','Month digits (3&ndash;4): 01&ndash;12','Month: 12 &#10003;') +
-      vci2('pass','Day valid for that month','Day: 14 &#10003;') +
-      vci2('pass','Date not in the future','Year: 1993 &#10003;')
+      div('ps-sec','Client-side validation (DIS Spec v1.1)')+
+      vci2('pass','Exactly 13 numeric digits','VALID')+
+      vci2('pass','Month (digits 3–4): 01–12','Month: 12 ✓')+
+      vci2('pass','Day valid for that month','Day: 14 ✓')+
+      vci2('pass','Date not in the future','Year: 1993 ✓')
     )
   );
 
   if(id==='dis-call') return (
-    phaseHdr('a','Current phase','DIS API calls in progress &mdash; DHA Direct','a') +
+    phHdr('a','Current phase','DIS API calls in progress — DHA Direct','a')+
     apiCard('POST','/id-service/1.0/dhaIdVerification',
-      kv('idNumber','9312340054084') + kv('partnerCode','PSODMU') + kv('cache','false'),
-      '<div style="color:#64748b;font-style:italic">Awaiting DHA response...</div>',
-      'pending'
-    ) +
+      kv('idNumber','9312340054084')+kv('partnerCode','PSODMU')+kv('cache','false'),
+      '<div style="color:#64748b;font-style:italic">Awaiting DHA response...</div>','pending')+
     apiCard('POST','/id-service/1.0/cellphoneVerification',
-      kv('idNumber','9312340054084') + kv('partnerCode','PSODMU'),
-      '<div style="color:#64748b;font-style:italic">Awaiting verification...</div>',
-      'pending'
-    ) +
-    callout('co-in','&#8505;&#65039;','<strong>Two DIS calls run simultaneously.</strong> dhaIdVerification retrieves the full identity record from DHA Direct. cellphoneVerification confirms the number is RICA-registered to this ID. The HB client database is <strong>not queried yet</strong>.') +
-    auditLog([
-      ['00:15.1','a','POST dhaIdVerification &mdash; connecting to DHA Direct'],
-      ['00:15.2','a','POST cellphoneVerification &mdash; checking RICA link'],
+      kv('idNumber','9312340054084')+kv('partnerCode','PSODMU'),
+      '<div style="color:#64748b;font-style:italic">Awaiting verification...</div>','pending')+
+    co('co-in','&#8505;&#65039;','<strong>Two DIS calls run simultaneously.</strong> dhaIdVerification retrieves the full identity record from DHA Direct. cellphoneVerification confirms the number is RICA-registered to this ID. The HB client database is <strong>not queried yet</strong>.')+
+    alog([
+      ['00:15.1','a','POST dhaIdVerification — connecting to DHA Direct'],
+      ['00:15.2','a','POST cellphoneVerification — checking RICA link'],
       ['00:15.8','a','Awaiting responses...']
     ])
   );
 
   if(id==='dis-res') return (
-    phaseHdr('a','Current phase','DIS responses received &mdash; identity confirmed','a') +
-    apiCard('POST','/id-service/1.0/dhaIdVerification',
-      kv('idNumber','9312340054084'),
-      kv('"code"','0') + kv('"firstNames"','"JOHANNES"') + kv('"surname"','"MOKOENA"') + kv('"dateOfBirth"','"1993-12-14"') + kv('"gender"','"Male"') + kv('"status"','"Active"') + kv('"dataSource"','"DHA Direct"'),
-      'ok'
-    ) +
-    apiCard('POST','/id-service/1.0/cellphoneVerification',
-      kv('idNumber','9312340054084'),
-      kv('"isValid"','true') + kv('"carrier"','"Vodacom"') + kv('"score"','100'),
-      'ok'
-    ) +
-    callout('co-sv','&#10003;','<strong>Identity verified.</strong> DHA data pre-fills name, DOB and gender. Provider confirms preferred name. <strong>Now the system performs the Healthbridge client database lookup.</strong>') +
-    auditLog([
-      ['00:16.2','ok','dhaIdVerification: <span class="al-g">200 OK</span> &mdash; Johannes Mokoena, Active'],
-      ['00:16.3','ok','cellphoneVerification: <span class="al-g">200 OK</span> &mdash; Vodacom, score 100'],
-      ['00:16.4','s','Identity pre-filled &mdash; <span class="al-y">preparing HB client DB lookup</span>']
+    phHdr('a','Current phase','DIS responses received — identity confirmed','a')+
+    apiCard('POST','/id-service/1.0/dhaIdVerification',kv('idNumber','9312340054084'),
+      kv('"code"','0')+kv('"firstNames"','"JOHANNES"')+kv('"surname"','"MOKOENA"')+kv('"dateOfBirth"','"1993-12-14"')+kv('"status"','"Active"')+kv('"dataSource"','"DHA Direct"'),'ok')+
+    apiCard('POST','/id-service/1.0/cellphoneVerification',kv('idNumber','9312340054084'),
+      kv('"isValid"','true')+kv('"carrier"','"Vodacom"')+kv('"score"','100'),'ok')+
+    co('co-sv','&#10003;','<strong>Identity confirmed.</strong> DHA data pre-fills name, DOB and gender. The provider confirms their preferred name. <strong>Next: Healthbridge client database lookup.</strong>')+
+    alog([
+      ['00:16.2','ok','dhaIdVerification: <span class="al-g">200 OK</span> — Johannes Mokoena, Active'],
+      ['00:16.3','ok','cellphoneVerification: <span class="al-g">200 OK</span> — Vodacom, score 100'],
+      ['00:16.4','s','Identity pre-filled — <span class="al-y">preparing HB client DB lookup</span>']
     ])
   );
 
   if(id==='hb-check') return (
-    phaseHdr('d','Current phase','Healthbridge client DB lookup &mdash; post-DIS','d') +
+    div('key-moment','&#11088; Key moment — HB client database lookup')+
+    phHdr('d','Current phase','Healthbridge client DB lookup — post-DIS','d')+
     div('db-spotlight',
-      div('db-spot-t','&#128451; HB Client Database Lookup') +
-      div('db-spot-s','Now that DHA has confirmed the identity of <strong>Johannes Mokoena (ID: 9312340054084)</strong>, the system looks up this verified identity in the Healthbridge client database to determine the correct workflow.') +
+      div('db-spot-t','&#128451; HB Client Database Check')+
+      div('db-spot-s','DHA has confirmed the identity. Now the system looks up <strong>Johannes Mokoena</strong> in the Healthbridge client database to determine which of the three routes to take.')+
       div('db-steps',
-        div('dbs ok', div('dbs-dot','')+'DIS identity verified &#10003;') +
-        div('dbs pend', div('dbs-dot','')+'Querying HB client DB by verified ID hash...') +
-        div('dbs skip', div('dbs-dot','')+'Route decision (pending)')
+        div('dbs ok',div('dbs-dot','')+'DIS identity verified ✓')+
+        div('dbs pend',div('dbs-dot','')+'Querying HB client DB by verified ID hash...')+
+        div('dbs skip',div('dbs-dot','')+'Route decision (pending)')
       )
-    ) +
+    )+
     div('proc-steps',
-      procStep('&#127963;&#65039;','a','DHA identity confirmed','9312340054084 &mdash; Johannes Mokoena, Active','a','done','api') +
-      procStep('&#128451;','d','HB client database lookup','Searching by verified DHA identity hash &mdash; checking for existing accounts','d','act','dec')
-    ) +
-    callout('co-in','&#8505;&#65039;','<strong>This is the key design decision.</strong> The HB database check only runs after DIS has confirmed the identity. This ensures we are matching against a real, DHA-verified person &mdash; not an unverified self-declared ID number.') +
-    auditLog([
-      ['00:16.5','s','DIS verification complete &mdash; querying HB client DB'],
+      procStep('&#127963;&#65039;','a','DHA identity confirmed','Johannes Mokoena — Active, DHA Direct','a','done','api')+
+      procStep('&#128451;','d','HB client database lookup','Searching by verified DHA identity hash','d','act','dec')
+    )+
+    co('co-in','&#8505;&#65039;','<strong>This check only runs after DIS has confirmed the identity.</strong> This ensures we match against a real, DHA-verified person — not an unverified self-declared ID number.')+
+    alog([
+      ['00:16.5','s','DIS complete — querying HB client DB'],
       ['00:16.6','s','Hashing verified ID for DB lookup'],
-      ['00:16.7','s','Searching: active Clinical &rarr; existing HB clients &rarr; no record']
+      ['00:16.7','s','Searching: active Clinical → existing HB → no record']
     ])
   );
 
-  if(id==='route-out') {
-    var r = simRoute;
-    var res = r==='new' ? '<div class="dec-result" style="color:#166534">&#128994; New client &mdash; proceed to professional &amp; practice details</div>' :
-              r==='hb'  ? '<div class="dec-result" style="color:#1E40AF">&#128309; Existing HB client &mdash; pre-fill profile and continue</div>' :
-                          '<div class="dec-result" style="color:#991B1B">&#128308; Active Clinical account &mdash; block registration, redirect to sign-in</div>';
+  if(id==='route-out'){
+    var r=simRoute;
     return (
-      phaseHdr('d','Current phase','Route decision based on HB DB result','d') +
-      decBlock(r) +
-      (r==='clin' ? callout('co-sv','&#10003;','<strong>Registration blocked efficiently.</strong> Identity was confirmed by DHA before the HB lookup &mdash; we know exactly who we are blocking. No duplicate account possible. Full audit trail available.') :
-       r==='hb'   ? callout('co-in','&#8505;&#65039;','<strong>Profile pre-fill applied.</strong> Because identity is DHA-confirmed, we can safely pre-fill data from the HB profile. Provider only needs to verify and complete missing fields.') :
-                    callout('co-sv','&#10003;','<strong>New registration confirmed.</strong> DHA says this is a real person with no existing HB relationship. Full professional and practice details capture follows.')) +
-      auditLog([
+      phHdr('d','Current phase','Route decision based on HB DB result','d')+
+      decBlock(r)+
+      (r==='clin'?co('co-sv','&#10003;','<strong>Registration blocked efficiently.</strong> Because identity was DHA-confirmed first, the block message uses the provider’s real name and practice — not a generic error.'):
+       r==='hb' ?co('co-in','&#8505;&#65039;','<strong>Profile pre-fill applied.</strong> Because identity is DHA-confirmed, we can safely use data from the HB profile. The provider verifies and completes missing fields.'):
+                 co('co-sv','&#10003;','<strong>New registration confirmed.</strong> DHA says this is a real person with no existing HB relationship. Full professional and practice capture follows.'))+
+      alog([
         ['00:16.8','s','HB DB result: <span class="'+(r==='new'?'al-g':r==='hb'?'al-y':'al-r')+'">'+(r==='new'?'NO RECORD':r==='hb'?'EXISTING HB CLIENT':'ACTIVE CLINICAL ACCOUNT')+'</span>'],
-        ['00:16.9','s','Route selected: <span class="'+(r==='new'?'al-g':r==='hb'?'al-y':'al-r')+'">'+(r==='new'?'ROUTE 1 &mdash; NEW':r==='hb'?'ROUTE 2 &mdash; EXISTING HB':'ROUTE 3 &mdash; BLOCK')+'</span>']
+        ['00:16.9','s','Route: <span class="'+(r==='new'?'al-g':r==='hb'?'al-y':'al-r')+'">'+(r==='new'?'ROUTE 1 — NEW':r==='hb'?'ROUTE 2 — EXISTING HB':'ROUTE 3 — BLOCK')+'</span>']
       ])
     );
   }
 
-  if(id==='continue') {
+  if(id==='continue'){
     if(simRoute==='clin') return (
-      phaseHdr('dn','Flow terminated','Provider blocked &mdash; redirected to sign-in','dn') +
-      callout('co-sv','&#10003;','<strong>Clean block with full context.</strong> Because DIS verified the identity first, the block message is personalised with the provider\'s confirmed name and practice details &mdash; not a generic error.') +
+      phHdr('dn','Flow terminated','Provider blocked — redirected to sign-in','dn')+
+      co('co-sv','&#10003;','<strong>Clean block with full context.</strong> DIS verified the identity first, so the block message is personalised with the provider’s confirmed name and practice.')+
       div('proc-steps',
-        procStep('&#128683;','b','Registration blocked','Active HB Clinical account confirmed via DHA-verified identity','b','done','blk') +
+        procStep('&#128683;','b','Registration blocked','Active HB Clinical confirmed via DHA-verified identity','b','done','blk')+
         procStep('&#128172;','p','Personalised message shown','Provider sees their confirmed name and existing account details','p','act')
-      ) +
-      auditLog([
+      )+
+      alog([
         ['00:17.0','s','Block message rendered for <span class="al-h">Dr Johannes Mokoena</span>'],
-        ['00:17.1','s','Sign-in redirect URL provided'],
-        ['00:17.2','ok','Attempt logged &mdash; device counter unchanged (block is free)']
+        ['00:17.1','s','Sign-in redirect provided'],
+        ['00:17.2','ok','Attempt logged — device counter unchanged']
       ])
     );
     return (
-      phaseHdr('p','Current phase', simRoute==='hb'?'Reduced flow &mdash; pre-filled professional details':'Provider entering professional details','p') +
+      phHdr('p','Current phase',simRoute==='hb'?'Pre-filled professional details — reduced entry':'Provider entering professional details','p')+
       div('proc-steps',
-        procStep('&#127891;','p','Professional details captured','Discipline, HPCSA, practice number &mdash; format validated locally','p','act') +
-        (simRoute==='hb' ? procStep('&#127968;','i','Practice step skipped','Practice and address details already on file in Healthbridge systems','i','done') : '')
-      ) +
+        procStep('&#127891;','p','Professional details captured','Discipline, HPCSA, practice number — format validated locally','p','act')+
+        (simRoute==='hb'?procStep('&#127968;','i','Practice step skipped','Practice and address details already on file in Healthbridge systems','i','done'):'')
+      )+
       div('',
-        vci2('pass','HPCSA format: ^[A-Z]{2}\\d{1,7}$', simRoute==='hb'?'GP0876543 &#10003;':'MP0123456 &#10003;') +
-        vci2('pass','Discipline selected','General Practitioner &#10003;') +
-        (simRoute==='hb' ? vci2('pass','Practice details pre-filled','From existing HB profile &#10003;') : '')
-      ) +
-      callout('co-na','&#128683;','<strong>No external API calls during data entry.</strong> All validation is client-side pattern matching. DIS requestOTVPin will be called once account credentials are created.')
+        vci2('pass','HPCSA format: ^[A-Z]{2}\d{1,7}$',simRoute==='hb'?'GP0876543 ✓':'MP0123456 ✓')+
+        vci2('pass','Discipline selected','General Practitioner ✓')+
+        (simRoute==='hb'?vci2('pass','Practice details pre-filled','From existing HB profile ✓'):'')
+      )+
+      co('co-na','&#128683;','<strong>No external API calls during data entry.</strong> DIS requestOTVPin will be called once account credentials are created.')
     );
   }
 
   if(id==='done') return (
-    phaseHdr('dn','Flow complete','Account provisioned and activated','dn') +
+    phHdr('dn','Flow complete','Account provisioned and activated','dn')+
     div('proc-steps',
-      procStep('&#128190;','i','Account provisioned','Healthbridge Clinical profile created and activated','i','done') +
-      procStep('&#128202;','i','Campaign tracked','Sign-up attributed to '+SRCS[curSrc].event,'i','done') +
+      procStep('&#128190;','i','Account provisioned','Healthbridge Clinical profile created and activated','i','done')+
+      procStep('&#128202;','i','Campaign tracked','Sign-up attributed to '+src.event,'i','done')+
       procStep('&#128203;','i','POPIA audit written','Consent, DIS calls, and HB DB match all logged','i','done')
-    ) +
+    )+
     div('db-spotlight',
-      div('db-spot-t','&#128202; Total API calls this session') +
+      div('db-spot-t','&#128202; API calls this session')+
       div('db-steps',
-        div('dbs ok', div('dbs-dot','')+'DIS dhaIdVerification: 1 call') +
-        div('dbs ok', div('dbs-dot','')+'DIS cellphoneVerification: 1 call') +
-        div('dbs ok', div('dbs-dot','')+'DIS requestOTVPin (OTP): 1 call') +
-        div('dbs ok', div('dbs-dot','')+'HB client DB lookup: 1 call (post-DIS)') +
-        div('dbs skip', div('dbs-dot','')+'Anti-fraud token check: 0 API calls (server-side token validation)')
+        div('dbs ok',div('dbs-dot','')+'DIS dhaIdVerification: 1 call')+
+        div('dbs ok',div('dbs-dot','')+'DIS cellphoneVerification: 1 call')+
+        div('dbs ok',div('dbs-dot','')+'DIS requestOTVPin (OTP): 1 call')+
+        div('dbs ok',div('dbs-dot','')+'HB client DB lookup: 1 call (post-DIS)')+
+        div('dbs skip',div('dbs-dot','')+'Anti-fraud token check: 0 API calls (server-side only)')
       )
-    ) +
-    callout('co-sv','&#10003;','<strong>Total: 3 DIS calls + 1 HB DB query.</strong> The HB lookup runs once, after DIS, against a verified identity. No wasted calls on unverified or duplicate submissions.')
+    )+
+    co('co-sv','&#10003;','<strong>Total: 3 DIS calls + 1 HB DB query.</strong> The HB lookup ran once, after DIS, against a verified identity.')
   );
-
   return '';
 }
 
-// ══════════════════════════════════════════════════════
-//  RENDER ENGINE
-// ══════════════════════════════════════════════════════
-function buildDots() {
-  var el = document.getElementById('ph-dots');
-  if(!el) return;
-  var html = '';
-  for(var i=0;i<STEPS.length;i++) {
-    html += i<stepIdx ? '<div class="pd done"></div>' : i===stepIdx ? '<div class="pd cur"></div>' : '<div class="pd"></div>';
-  }
-  html += '<span class="pd-lbl">' + (STEPS[stepIdx]?STEPS[stepIdx].lbl:'') + '</span>';
-  el.innerHTML = html;
+// ══ RENDER ════════════════════════════════════════════
+function buildDots(){
+  var el2=document.getElementById('ph-dots');
+  if(!el2)return;
+  var h='';
+  for(var i=0;i<STEPS.length;i++) h+=i<stepIdx?'<div class="pd done"></div>':i===stepIdx?'<div class="pd cur"></div>':'<div class="pd"></div>';
+  h+='<span class="pd-lbl">'+(stepIdx+1)+' of '+STEPS.length+'</span>';
+  el2.innerHTML=h;
 }
-
-function buildStepNav() {
-  var el = document.getElementById('step-nav');
-  if(!el) return;
-  var html = '';
+function buildStepNav(){
+  var el2=document.getElementById('step-nav');
+  if(!el2)return;
+  var h='';
   STEPS.forEach(function(s,i){
-    if(i>0) html += '<span class="sni-arrow">&rsaquo;</span>';
-    var cls = 'sni' + (i===stepIdx?' active':i<stepIdx?' done':'');
-    html += '<div class="'+cls+'" data-step="'+i+'">' +
-      '<div class="sni-n">'+(i<stepIdx?'&#10003;':String(i+1))+'</div>'+s.nav+
-    '</div>';
+    if(i>0)h+='<span class="sni-arr">&rsaquo;</span>';
+    var cls='sni'+(i===stepIdx?' active':i<stepIdx?' done':'');
+    h+='<div class="'+cls+'" data-step="'+i+'"><div class="sni-n">'+(i<stepIdx?'&#10003;':String(i+1))+'</div>'+s.nav+'</div>';
   });
-  el.innerHTML = html;
-  el.querySelectorAll('.sni').forEach(function(n){
-    n.addEventListener('click', function(){
-      stepIdx = parseInt(n.dataset.step);
-      appRender();
-    });
+  el2.innerHTML=h;
+  el2.querySelectorAll('.sni').forEach(function(n){
+    n.addEventListener('click',function(){ stepIdx=parseInt(n.dataset.step); appRender(); });
   });
   setTimeout(function(){
-    var a = el.querySelector('.active');
-    if(a) a.scrollIntoView({block:'nearest',inline:'center',behavior:'smooth'});
-  }, 50);
+    var a=el2.querySelector('.active');
+    if(a)a.scrollIntoView({block:'nearest',inline:'center',behavior:'smooth'});
+  },50);
 }
 
-function updateRoutePill() {
-  var pill = document.getElementById('route-pill');
-  if(!pill) return;
-  var showFrom = ['route-out','continue','done'];
-  var cur = STEPS[stepIdx] ? STEPS[stepIdx].id : '';
-  if(showFrom.indexOf(cur) >= 0 && simRoute !== 'new') {
-    if(simRoute==='hb') {
-      pill.className = 'route-pill rp-hb';
-      pill.textContent = '\u25CF Existing HB Client';
-    } else {
-      pill.className = 'route-pill rp-c';
-      pill.textContent = '\u25CF Already on Clinical';
-    }
-  } else {
-    pill.className = 'route-pill rp-h';
-    pill.textContent = '';
+function appRender(){
+  var step=STEPS[stepIdx];
+  if(!step)return;
+  var pp=document.getElementById('ph-prog');
+  if(pp)pp.style.width=step.prog+'%';
+  buildDots(); buildStepNav(); syncPresenterBar();
+  var scr=document.getElementById('ph-screen');
+  if(scr) scr.innerHTML=clientScreen(step.id);
+  var intEl=document.getElementById('int-panel');
+  if(intEl) intEl.innerHTML=internalPanel(step.id);
+  var ctr=document.getElementById('nav-ctr');
+  if(ctr) ctr.textContent=step.nav+' · Step '+(stepIdx+1)+' of '+STEPS.length;
+  // Rebind screen actions
+  var scr2=document.getElementById('ph-screen');
+  if(scr2){
+    scr2.querySelectorAll('[data-act="next"]').forEach(function(b){ b.addEventListener('click',nextStep); });
+    scr2.querySelectorAll('[data-act="restart"]').forEach(function(b){ b.addEventListener('click',function(){ stepIdx=Math.max(0,stepIdx-3); appRender(); }); });
+    scr2.querySelectorAll('[data-act="restart-full"]').forEach(function(b){ b.addEventListener('click',function(){ stepIdx=0;simRoute='new';show('s-setup'); }); });
   }
 }
 
-function appRender() {
-  var step = STEPS[stepIdx];
-  if(!step) return;
-
-  var pg = document.getElementById('ph-prog');
-  if(pg) pg.style.width = step.prog + '%';
-
-  buildDots();
-  buildStepNav();
-  updateRoutePill();
-
-  var scr = document.getElementById('ph-screen');
-  if(scr) scr.innerHTML = clientScreen(step.id);
-
-  var intEl = document.getElementById('int-panel');
-  if(intEl) intEl.innerHTML = internalPanel(step.id);
-
-  var ctr = document.getElementById('nav-ctr');
-  if(ctr) ctr.textContent = step.nav + ' \u00B7 ' + (stepIdx+1) + ' of ' + STEPS.length;
-
-  // Rebind dynamic elements
-  var scr2 = document.getElementById('ph-screen');
-  if(scr2) {
-    // Sim chips
-    scr2.querySelectorAll('[data-sim]').forEach(function(b){
-      b.addEventListener('click', function(){
-        simRoute = b.dataset.sim;
-        appRender();
-      });
-    });
-    // Nav buttons in screen
-    scr2.querySelectorAll('[data-act="next"]').forEach(function(b){
-      b.addEventListener('click', nextStep);
-    });
-    scr2.querySelectorAll('[data-act="restart"]').forEach(function(b){
-      b.addEventListener('click', function(){ stepIdx=0; simRoute='new'; appRender(); });
-    });
-  }
-}
-
-function nextStep() { if(stepIdx < STEPS.length-1){ stepIdx++; appRender(); } }
-function prevStep() { if(stepIdx > 0){ stepIdx--; appRender(); } }
-
-document.getElementById('nav-next').addEventListener('click', nextStep);
-document.getElementById('nav-prev').addEventListener('click', prevStep);
+function nextStep(){ if(stepIdx<STEPS.length-1){ stepIdx++; appRender(); } }
+function prevStep(){ if(stepIdx>0){ stepIdx--; appRender(); } }
+document.getElementById('nav-next').addEventListener('click',nextStep);
+document.getElementById('nav-prev').addEventListener('click',prevStep);
 </script>
 </body>
 </html>
